@@ -8,8 +8,7 @@ import numpy as np
 
 path = "../dataset"
 thread_num = 16
-# split the data into chunks equal to the thread count (to avoid memory errors I am splitting the dataset as it is too big for my memory to handle)
-chunks = np.split(np.asarray(os.listdir(path)), thread_num)
+
 
 
 # a function that takes a list of files and returns it as a dataset
@@ -29,8 +28,10 @@ def load_dataset(load_from, load_to):
     x = []
     y = []
     threads = []
+    # split the data into chunks equal to the thread count (to avoid memory errors I am splitting the dataset as it is too big for my memory to handle)
+    chunks = np.split(np.asarray(os.listdir(path)[load_from:load_to]), thread_num)
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        for chunk in chunks[load_from:load_to]:
+        for chunk in chunks:
             f = executor.submit(load_data, chunk)
             threads.append(f)
     for thread in threads:
