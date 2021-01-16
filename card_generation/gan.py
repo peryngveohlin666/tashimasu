@@ -141,4 +141,5 @@ combined.compile(loss='binary_crossentropy', optimizer=optimizer)
 
 for i in range(0, 140000, 256):
     train(epochs=50, batch_size=256, save_interval=50, ds_begin=i, ds_end=i+256)
-    generator.save('generator_model.h5')
+
+generator.save('generator_model.h5')
