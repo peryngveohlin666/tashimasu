@@ -1,5 +1,3 @@
-import os
-
 from keras.layers import Input, Dense, Reshape, Flatten
 from keras.layers import BatchNormalization
 from keras.layers.advanced_activations import LeakyReLU
@@ -14,6 +12,7 @@ img_cols = 512
 channels = 3
 img_shape = (img_rows, img_cols, channels)
 
+
 def build_generator():
     noise_shape = (100,)  # 1D array of size 100 (latent vector / noise)
 
@@ -22,18 +21,19 @@ def build_generator():
     model.add(Dense(64, input_shape=noise_shape))
     model.add(LeakyReLU(alpha=0.2))
     model.add(BatchNormalization(momentum=0.8))
+
     model.add(Dense(128))
     model.add(LeakyReLU(alpha=0.2))
     model.add(BatchNormalization(momentum=0.8))
+
     model.add(Dense(128))
     model.add(LeakyReLU(alpha=0.2))
     model.add(BatchNormalization(momentum=0.8))
-    model.add(Dense(128))
+
+    model.add(Dense(256))
     model.add(LeakyReLU(alpha=0.2))
     model.add(BatchNormalization(momentum=0.8))
-    model.add(Dense(128))
-    model.add(LeakyReLU(alpha=0.2))
-    model.add(BatchNormalization(momentum=0.8))
+
     model.add(Dense(256))
     model.add(LeakyReLU(alpha=0.2))
     model.add(BatchNormalization(momentum=0.8))
@@ -55,15 +55,18 @@ def build_discriminator():
     model.add(Flatten(input_shape=img_shape))
     model.add(Dense(256))
     model.add(LeakyReLU(alpha=0.2))
+
     model.add(Dense(128))
     model.add(LeakyReLU(alpha=0.2))
+
     model.add(Dense(128))
     model.add(LeakyReLU(alpha=0.2))
-    model.add(Dense(128))
+
+    model.add(Dense(512))
     model.add(LeakyReLU(alpha=0.2))
-    model.add(Dense(128))
-    model.add(LeakyReLU(alpha=0.2))
+
     model.add(Dense(1, activation='sigmoid'))
+
     model.summary()
 
     img = Input(shape=img_shape)
@@ -113,7 +116,7 @@ def save_imgs(epoch, ds):
     gen_imgs = generator.predict(noise)
     for image in gen_imgs:
         img = array_to_img(image)
-        img.save("output/" + ds + "_anime" + ".png")
+        img.save("output/" + ds + "_anime_" + str(epoch) + ".png")
 
 
 optimizer = Adam(0.0002, 0.5)
@@ -139,7 +142,6 @@ valid = discriminator(img)
 combined = Model(z, valid)
 combined.compile(loss='binary_crossentropy', optimizer=optimizer)
 
-for i in range(0, 140000, 256):
-    train(epochs=50, batch_size=256, save_interval=50, ds_begin=i, ds_end=i+256)
-
-generator.save('generator_model.h5')
+for i in range(0, 140000, 64):
+    train(epochs=100, batch_size=64, save_interval=50, ds_begin=i, ds_end=i+64)
+    generator.save('generator_model.h5')
