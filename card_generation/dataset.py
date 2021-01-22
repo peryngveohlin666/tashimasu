@@ -22,7 +22,7 @@ import concurrent.futures
 from PIL import Image
 import numpy as np
 
-path = "../dataset"
+path = "../dataset/faces"
 
 
 
