@@ -116,7 +116,7 @@ def save_imgs(epoch, ds):
     gen_imgs = generator.predict(noise)
     for image in gen_imgs:
         img = array_to_img(image)
-        img.save("output/" + ds + "_anime_" + str(epoch) + ".png")
+        img.save("training_output/" + ds + "_anime_" + str(epoch) + ".png")
 
 
 optimizer = Adam(0.0002, 0.5)
@@ -126,6 +126,9 @@ discriminator.compile(loss='binary_crossentropy',
                       optimizer=optimizer,
                       metrics=['accuracy'])
 
+
+discriminator.trainable = False
+
 generator = build_generator()
 generator.compile(loss='binary_crossentropy', optimizer=optimizer)
 
@@ -134,14 +137,14 @@ z = Input(shape=(100,))
 img = generator(z)
 
 
-discriminator.trainable = False
-
-
 valid = discriminator(img)
 
 combined = Model(z, valid)
 combined.compile(loss='binary_crossentropy', optimizer=optimizer)
 
 for i in range(0, 140000, 64):
+    # to not go above the amount of pictures in the dataset
+    if i > 140000 - 64:
+        i = 140000 - 64
     train(epochs=100, batch_size=64, save_interval=50, ds_begin=i, ds_end=i+64)
     generator.save('generator_model.h5')
