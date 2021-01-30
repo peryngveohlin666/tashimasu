@@ -4,3 +4,5 @@ https://arxiv.org/abs/1809.11096
 docker pull tensorflow/tensorflow:latest-gpu 
 https://github.com/bnsreenu/python_for_microscopists/blob/master/125_126_GAN_training_mnist.py
 https://github.com/bnsreenu/python_for_microscopists/blob/master/125_126_GAN_predict_mnist.py
+https://docs.godotengine.org/en/stable/tutorials/networking/websocket.html
+https://github.com/coelhucas/blog/issues/3
