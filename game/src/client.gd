@@ -1,7 +1,7 @@
 extends Node
 
 const PORT: int = 6565
-const URL: String = "ws://localhost:%s" % PORT
+const URL: String = "wss://localhost:%s" % PORT
 
 var client: WebSocketClient
 var cert : X509Certificate
@@ -13,7 +13,7 @@ func _ready():
 	
 	client = WebSocketClient.new()
 	client.set_trusted_ssl_certificate(cert)
-	client.verify_ssl = true
+	client.verify_ssl = false
 	
 	client.connect_to_url(URL)
 	
@@ -36,7 +36,7 @@ func _on_received_data() -> void:
 	var parsed_data: String = packet.get_string_from_utf8()
 	print(parsed_data)
 	
-	send_message(parsed_data + "h")
+	send_message(parsed_data + "helloooo")
 	
 # a function to send message to the server
 func send_message(message: String) -> void:

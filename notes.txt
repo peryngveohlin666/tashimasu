@@ -6,3 +6,7 @@ https://github.com/bnsreenu/python_for_microscopists/blob/master/125_126_GAN_tra
 https://github.com/bnsreenu/python_for_microscopists/blob/master/125_126_GAN_predict_mnist.py
 https://docs.godotengine.org/en/stable/tutorials/networking/websocket.html
 https://github.com/coelhucas/blog/issues/3
+
+godot has an autistic debugger that outputs gdscript values into a port of your choice, the traffic that shows up in gdscript that is not in port 6565 is not unencrypted.
+
+The certificate can't be validated but it is being used since can't afford a CA and idk how self signing works/cba asked to learn it since gonna put it in a CA on release anyway and now im sure it works.

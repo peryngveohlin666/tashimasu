@@ -9,7 +9,7 @@ DATA_SEPERATOR = ","    # seperate the data sent alongside with a message
 LOGIN_MESSAGE = "LOGIN"
 
 
-ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 ssl_context.load_cert_chain('cert/tashimasu.crt', 'cert/tashimasu.key')
 
 
@@ -42,13 +42,13 @@ async def respond(websocket, path):
             response = handle_message(message)
             response = str(i)
             print(message)
-            await websocket.send(response)
+            await websocket.send(response + "yoo testing with wireshark")
     except:
         print("an error occured")
     finally:
         print(f"disconnected unresponsive socket {websocket}")
 
-start_server = websockets.serve(respond, IP, PORT)
+start_server = websockets.serve(respond, IP, PORT, ssl=ssl_context)
 
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
