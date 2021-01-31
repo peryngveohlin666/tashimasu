@@ -1,4 +1,4 @@
-import asyncio, websockets
+import asyncio, websockets, ssl
 
 IP = "localhost"
 PORT = 6565
@@ -8,7 +8,9 @@ DATA_SEPERATOR = ","    # seperate the data sent alongside with a message
 
 LOGIN_MESSAGE = "LOGIN"
 
-counter = 0
+
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+ssl_context.load_cert_chain('cert/tashimasu.crt', 'cert/tashimasu.key')
 
 
 def handle_message(message):
@@ -39,8 +41,10 @@ async def respond(websocket, path):
             message = message.decode('UTF-8')
             response = handle_message(message)
             response = str(i)
-            print(i)
+            print(message)
             await websocket.send(response)
+    except:
+        print("an error occured")
     finally:
         print(f"disconnected unresponsive socket {websocket}")
 
