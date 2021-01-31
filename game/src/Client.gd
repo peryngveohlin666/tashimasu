@@ -1,11 +1,14 @@
 extends Node
 
+# port and the url (for now some random port on my localhost)
 const PORT: int = 6565
 const URL: String = "wss://localhost:%s" % PORT
 
+# protocol level seperator and the data seperator
 const SEPERATOR: String = ":"
 const DATA_SEPERATOR: String = ","
 
+# protocol level login message
 const LOGIN_MESSAGE: String = "LOGIN"
 
 var client: WebSocketClient
@@ -13,15 +16,19 @@ var cert : X509Certificate
 
 func _ready():
 	
+	# load the certificate
 	cert = X509Certificate.new()
 	cert.load("res://cert/tashimasu.crt")
 	
+	# set the certificate but don't check it with a CA as I don't want to pay for that
 	client = WebSocketClient.new()
 	client.set_trusted_ssl_certificate(cert)
 	client.set_verify_ssl_enabled(false)
 	
+	# connect to the server
 	client.connect_to_url(URL)
 	
+	# set the data received and connection established functions
 	client.connect("data_received", self, "_on_received_data")
 	client.connect("connection_established", self, "_on_connected")
 	
@@ -44,7 +51,6 @@ func _on_received_data() -> void:
 func send_message(message: String) -> void:
 	var packet: PoolByteArray = message.to_utf8()
 	client.get_peer(1).put_packet(packet)
-	
 	
 # a function to log in
 func login(username: String, password: String):
