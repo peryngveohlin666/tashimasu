@@ -16,7 +16,7 @@ _global_script_class_icons={
 [application]
 
 config/name="tashimasu"
-run/main_scene="res://objects/Game.tscn"
+run/main_scene="res://scenes/Main.tscn"
 config/icon="res://icon.png"
 
 [network]

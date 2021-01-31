@@ -3,6 +3,11 @@ extends Node
 const PORT: int = 6565
 const URL: String = "wss://localhost:%s" % PORT
 
+const SEPERATOR: String = ":"
+const DATA_SEPERATOR: String = ","
+
+const LOGIN_MESSAGE: String = "LOGIN"
+
 var client: WebSocketClient
 var cert : X509Certificate
 
@@ -13,7 +18,7 @@ func _ready():
 	
 	client = WebSocketClient.new()
 	client.set_trusted_ssl_certificate(cert)
-	client.verify_ssl = false
+	client.set_verify_ssl_enabled(false)
 	
 	client.connect_to_url(URL)
 	
@@ -27,7 +32,6 @@ func _process(delta):
 # do when first connected to the server
 func _on_connected(_protocol: String) -> void:
 	print("Connected")
-	send_message("connected")
 	
 # do when whenever data is received
 func _on_received_data() -> void:
@@ -36,9 +40,13 @@ func _on_received_data() -> void:
 	var parsed_data: String = packet.get_string_from_utf8()
 	print(parsed_data)
 	
-	send_message(parsed_data + "helloooo")
-	
 # a function to send message to the server
 func send_message(message: String) -> void:
 	var packet: PoolByteArray = message.to_utf8()
 	client.get_peer(1).put_packet(packet)
+	
+	
+# a function to log in
+func login(username: String, password: String):
+	send_message(LOGIN_MESSAGE + SEPERATOR + str(len(username)) + 
+	DATA_SEPERATOR + str(len(password)) + DATA_SEPERATOR + username + DATA_SEPERATOR + password)
