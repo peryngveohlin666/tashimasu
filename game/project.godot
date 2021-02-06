@@ -19,10 +19,16 @@ config/name="tashimasu"
 run/main_scene="res://scenes/Main.tscn"
 config/icon="res://icon.png"
 
+[display]
+
+window/size/width=1920
+window/size/height=1080
+
 [network]
 
 ssl/certificates="res://cert/tashimasu.crt"
 
 [rendering]
 
+environment/default_clear_color=Color( 0.964706, 0.827451, 0.0862745, 1 )
 environment/default_environment="res://default_env.tres"

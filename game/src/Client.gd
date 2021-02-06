@@ -60,6 +60,7 @@ func _on_received_data() -> void:
 	if(_get_protocol_message(parsed_data) == SUCCESS_LOGIN_RESPONSE):
 		auth_token = _get_data(parsed_data)[0]
 		print(_get_data(parsed_data[0]))
+		get_parent().switch_to_menu_from_login_screen()
 	print("auth token")
 	print(auth_token)	
 	

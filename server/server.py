@@ -60,6 +60,8 @@ def login(message):
 
     if (len(username) == int(username_length)) and (len(password) == int(password_length)):
         result = collection.find_one({"username":username})
+        if not result:
+            return ERROR_MESSAGE, ""
 
         password_salt = result["password_salt"]
         print(password_salt)
@@ -77,6 +79,7 @@ def login(message):
 
 def register(message):
     message_data = get_data(message)
+    print(message)
 
     username_length = message_data[0]
     password_length = message_data[1]
