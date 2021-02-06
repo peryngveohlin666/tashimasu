@@ -14,4 +14,5 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	client.register("mert", "123")
 	client.login("mert", "123")

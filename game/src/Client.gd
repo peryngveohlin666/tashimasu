@@ -11,8 +11,16 @@ const DATA_SEPERATOR: String = ","
 # protocol level login message
 const LOGIN_MESSAGE: String = "LOGIN"
 
+# protocol level register message
+const REGISTER_MESSAGE: String = "REGISTER"
+
+# protocol level success login response
+const SUCCESS_LOGIN_RESPONSE: String = "SUCCESS_LOGIN"
+
 var client: WebSocketClient
 var cert : X509Certificate
+
+var auth_token: String
 
 func _ready():
 	
@@ -46,6 +54,14 @@ func _on_received_data() -> void:
 	var packet: PoolByteArray = client.get_peer(1).get_packet()
 	var parsed_data: String = packet.get_string_from_utf8()
 	print(parsed_data)
+	print(_get_protocol_message(parsed_data))
+	print(_get_data(parsed_data))
+	# ree godot doesn't have a switch-case statement this is stupid
+	if(_get_protocol_message(parsed_data) == SUCCESS_LOGIN_RESPONSE):
+		auth_token = _get_data(parsed_data)[0]
+		print(_get_data(parsed_data[0]))
+	print("auth token")
+	print(auth_token)	
 	
 # a function to send message to the server
 func send_message(message: String) -> void:
@@ -56,3 +72,25 @@ func send_message(message: String) -> void:
 func login(username: String, password: String):
 	send_message(LOGIN_MESSAGE + SEPERATOR + str(len(username)) + 
 	DATA_SEPERATOR + str(len(password)) + DATA_SEPERATOR + username + DATA_SEPERATOR + password)
+	
+# a function to register
+func register(username: String, password: String):
+	send_message(REGISTER_MESSAGE + SEPERATOR + str(len(username)) + 
+	DATA_SEPERATOR + str(len(password)) + DATA_SEPERATOR + username + DATA_SEPERATOR + password)
+	
+# a function to get the protocol level message	
+func _get_protocol_message(message: String) -> String:
+	if SEPERATOR in message:
+		return message.split(SEPERATOR)[0]
+	else: 
+		return message
+	
+# a function to get the data
+func _get_data(message: String) -> PoolStringArray:
+	if SEPERATOR in message:
+		if DATA_SEPERATOR in message:
+			return message.split(SEPERATOR)[1].split(DATA_SEPERATOR)
+		else:
+			return PoolStringArray([message.split(SEPERATOR)[1]])
+	# thanks godot, for not having try, catch
+	return PoolStringArray(["asdf", "Asdf"])
