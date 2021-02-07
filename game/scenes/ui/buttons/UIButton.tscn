@@ -13,12 +13,14 @@ corner_radius_bottom_left = 10
 margin_right = 500.0
 margin_bottom = 140.0
 rect_min_size = Vector2( 500, 140 )
+keep_pressed_outside = true
 flat = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Label" type="Label" parent="."]
+show_behind_parent = true
 anchor_right = 1.0
 anchor_bottom = 1.0
 size_flags_vertical = 0

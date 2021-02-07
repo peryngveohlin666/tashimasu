@@ -17,6 +17,8 @@ const REGISTER_MESSAGE: String = "REGISTER"
 # protocol level success login response
 const SUCCESS_LOGIN_RESPONSE: String = "SUCCESS_LOGIN"
 
+const ERROR_MESSAGE = "ERROR" # a generic error message
+
 var client: WebSocketClient
 var cert : X509Certificate
 
@@ -61,6 +63,8 @@ func _on_received_data() -> void:
 		auth_token = _get_data(parsed_data)[0]
 		print(_get_data(parsed_data[0]))
 		get_parent().switch_to_menu_from_login_screen()
+	if(_get_protocol_message(parsed_data) == ERROR_MESSAGE):
+		get_parent().show_error_popup()
 	print("auth token")
 	print(auth_token)	
 	

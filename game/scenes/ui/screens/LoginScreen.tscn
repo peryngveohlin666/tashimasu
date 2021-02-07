@@ -28,6 +28,7 @@ __meta__ = {
 [node name="ColorRect" type="ColorRect" parent="."]
 modulate = Color( 0.964706, 0.827451, 0.0862745, 1 )
 self_modulate = Color( 0.964706, 0.827451, 0.0862745, 1 )
+light_mask = -2147483647
 anchor_right = 1.0
 anchor_bottom = 1.0
 __meta__ = {
