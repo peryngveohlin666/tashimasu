@@ -3,6 +3,8 @@ import os
 import random
 import string
 import bcrypt
+import concurrent.futures
+import Player
 
 import pymongo
 from pymongo import MongoClient
@@ -37,13 +39,25 @@ SUCCESS_RESPONSE = "SUCCESS"  # a generic message that indicates that the latest
 
 SUCCESS_LOGIN_RESPONSE = "SUCCESS_LOGIN" # a generic message that indicates the login was successfull
 
-ERROR_MESSAGE = "ERROR" # a generic error message
+ERROR_MESSAGE = "ERROR"  # a generic error message
+
+MATCHMAKE_MESSAGE = "MATCHMAKE"  # matchmake message
+
+GAME_FOUND_MESSAGE = "GAMEFOUND"  # game found message, add enemy username, whose turn it is
+
+YOUR_TURN_MESSAGE = "YOURTURN"  # YUGIOH BABY
+
+ENEMY_TURN_MESSAGE = "ENEMYTURN"  # ummm
 
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 ssl_context.load_cert_chain('cert/tashimasu.crt', 'cert/tashimasu.key')
 
 # keep track of the logged in users.
 logged_in_users = []
+
+# a list of currently matchmaking users
+matchmaking_users = []
+
 
 
 # get a message as a parameter and return an authentication key
@@ -59,7 +73,7 @@ def login(message):
     password = message_data[3]
 
     if (len(username) == int(username_length)) and (len(password) == int(password_length)):
-        result = collection.find_one({"username":username})
+        result = collection.find_one({"username": username})
         if not result:
             return ERROR_MESSAGE, ""
 
@@ -115,6 +129,26 @@ def get_starter_cards():
     out = out[:-1]
     return out
 
+# a function to constantly pair players who are matchmaking
+async def matchmake():
+    print("matchmake")
+    while len(matchmaking_users) >= 2:
+        p1 = matchmaking_users.pop(len(matchmaking_users) - 1)
+        p2 = matchmaking_users.pop(len(matchmaking_users) - 1)
+        for user in matchmaking_users:
+            print(user.username)
+        p1.set_enemy(p2)
+        p2.set_enemy(p1)
+        (p1_username, p1_socket) = p1.identifier
+        (p2_username, p2_socket) = p2.identifier
+        await p1_socket.send(GAME_FOUND_MESSAGE)
+        await p2_socket.send(GAME_FOUND_MESSAGE)
+        await p1_socket.send(YOUR_TURN_MESSAGE)
+        await p2_socket.send(ENEMY_TURN_MESSAGE)
+        print(p2_username + p1_username)
+    await asyncio.sleep(1) # matchmake every second
+    asyncio.create_task(matchmake())
+
 
 def generate_random_string():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=15))
@@ -130,6 +164,14 @@ def get_data(message):
     return message.split(SEPERATOR)[1].split(DATA_SEPERATOR)
 
 
+# get the deck of a user
+def get_deck(username):
+    result = collection.find_one({"username": username})
+    return result["deck"].split(SEPERATOR)
+
+
+
+
 # a dictionary to map protocol level messages to functions, some functions return multiple values so they are handled with if statements
 protocol_to_function = {
     REGISTER_MESSAGE: register
@@ -139,23 +181,38 @@ protocol_to_function = {
 async def respond(websocket, path):
     username = ""
     auth_key = ""
+
+    player = Player.Player()
+    enemy_socket = websocket
     try:
         async for message in websocket:
             message = message.decode('UTF-8')
-            print(message)
+            protocol_message = get_protocol_message(message)
 
-            if get_protocol_message(message) == LOGIN_MESSAGE:
+            # reset the response
+            response = ""
+
+            if protocol_message == LOGIN_MESSAGE:
                 response, un = login(message)
                 if un != "":
                     username += un
                     auth_key += response.split(SEPERATOR)[1]
+                    player.set_identifier((username, websocket)) # set the identifier of the player instance so that other enemies can communicate with us
+            elif protocol_message == MATCHMAKE_MESSAGE:
+                if player not in matchmaking_users:
+                    player.assign_deck(get_deck(username))
+                    matchmaking_users.append(player)
+                else:
+                    response = ERROR_MESSAGE
             else:
                 # get the proper function for the incoming protocol code and pass the message through to the necessary function
                 response = protocol_to_function[get_protocol_message(message)](message)
 
             print(response)
+            print(message)
 
-            await websocket.send(response)
+            if response != "":
+                await websocket.send(response)
     finally:
         logged_in_users.remove(username)
         print(f"disconnected unresponsive socket {websocket}")
@@ -164,4 +221,5 @@ async def respond(websocket, path):
 start_server = websockets.serve(respond, IP, PORT, ssl=ssl_context)
 
 asyncio.get_event_loop().run_until_complete(start_server)
+asyncio.get_event_loop().create_task(matchmake()) # matchmake in the server
 asyncio.get_event_loop().run_forever()

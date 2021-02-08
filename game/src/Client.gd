@@ -19,6 +19,14 @@ const SUCCESS_LOGIN_RESPONSE: String = "SUCCESS_LOGIN"
 
 const ERROR_MESSAGE = "ERROR" # a generic error message
 
+const MATCHMAKE_MESSAGE: String = "MATCHMAKE" # matchmake message
+
+const GAME_FOUND_MESSAGE: String = "GAMEFOUND"  # game found message, add enemy username, whose turn it is
+
+const ENEMY_TURN_MESSAGE: String = "ENEMYTURN"
+
+const YOUR_TURN_MESSAGE: String = "YOURTURN"
+
 var client: WebSocketClient
 var cert : X509Certificate
 
@@ -59,14 +67,18 @@ func _on_received_data() -> void:
 	print(_get_protocol_message(parsed_data))
 	print(_get_data(parsed_data))
 	# ree godot doesn't have a switch-case statement this is stupid
+	print(parsed_data)
 	if(_get_protocol_message(parsed_data) == SUCCESS_LOGIN_RESPONSE):
 		auth_token = _get_data(parsed_data)[0]
-		print(_get_data(parsed_data[0]))
 		get_parent().switch_to_menu_from_login_screen()
 	if(_get_protocol_message(parsed_data) == ERROR_MESSAGE):
 		get_parent().show_error_popup()
-	print("auth token")
-	print(auth_token)	
+	if(_get_protocol_message(parsed_data) == GAME_FOUND_MESSAGE):
+		get_parent().switch_to_game()
+	if(_get_protocol_message(parsed_data) == YOUR_TURN_MESSAGE):
+		get_parent().my_turn = true
+	if(_get_protocol_message(parsed_data) == ENEMY_TURN_MESSAGE):
+		get_parent().my_turn = false
 	
 # a function to send message to the server
 func send_message(message: String) -> void:
@@ -99,3 +111,6 @@ func _get_data(message: String) -> PoolStringArray:
 			return PoolStringArray([message.split(SEPERATOR)[1]])
 	# thanks godot, for not having try, catch
 	return PoolStringArray(["asdf", "Asdf"])
+	
+func matchmake():
+	send_message(MATCHMAKE_MESSAGE)

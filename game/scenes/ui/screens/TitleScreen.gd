@@ -1,6 +1,13 @@
 extends Control
 
+var title_screen : Node
+var main_screen : Node
+var client : Node
+
 func _ready():
+	title_screen = get_node(".")
+	main_screen = title_screen.get_parent()
+	client = main_screen.get_node("Client")
 	var exit_button = get_node("Menu/CenterRow/Buttons/ExitButton")
 	var matchmake_button = get_node("Menu/CenterRow/Buttons/MatchmakeButton")
 	var deck_maker_button = get_node("Menu/CenterRow/Buttons/DeckMakerButton")
@@ -12,8 +19,10 @@ func _on_exit_pressed():
 	get_tree().quit()	
 
 func _on_deckmaker_pressed():
-	var title_screen = get_node(".")
-	var main_screen = title_screen.get_parent()
 	main_screen.remove_child(title_screen)
 	var deckmaker_screen = load("res://scenes/game/DeckMaker.tscn").instance()
 	main_screen.add_child(deckmaker_screen)
+	
+func _on_matchmake_pressed():
+	client.matchmake()
+
