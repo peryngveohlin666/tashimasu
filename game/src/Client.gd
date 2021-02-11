@@ -75,6 +75,7 @@ func _on_received_data() -> void:
 		get_parent().show_error_popup()
 	if(_get_protocol_message(parsed_data) == GAME_FOUND_MESSAGE):
 		get_parent().switch_to_game()
+		get_parent().hide_matchmaking_popup()
 	if(_get_protocol_message(parsed_data) == YOUR_TURN_MESSAGE):
 		get_parent().my_turn = true
 	if(_get_protocol_message(parsed_data) == ENEMY_TURN_MESSAGE):
@@ -110,7 +111,7 @@ func _get_data(message: String) -> PoolStringArray:
 		else:
 			return PoolStringArray([message.split(SEPERATOR)[1]])
 	# thanks godot, for not having try, catch
-	return PoolStringArray(["asdf", "Asdf"])
+	return PoolStringArray(["not an", "error"])
 	
 func matchmake():
 	send_message(MATCHMAKE_MESSAGE)

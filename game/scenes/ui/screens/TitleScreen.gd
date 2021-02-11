@@ -25,4 +25,5 @@ func _on_deckmaker_pressed():
 	
 func _on_matchmake_pressed():
 	client.matchmake()
+	main_screen.show_matchmaking_popup()
 

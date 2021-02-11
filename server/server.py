@@ -215,6 +215,8 @@ async def respond(websocket, path):
                 await websocket.send(response)
     finally:
         logged_in_users.remove(username)
+        if username in matchmaking_users:
+            matchmaking_users.remove(username)
         print(f"disconnected unresponsive socket {websocket}")
 
 
