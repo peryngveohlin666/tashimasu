@@ -1,0 +1,197 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://src/Card.gd" type="Script" id=1]
+[ext_resource path="res://assets/fonts/Game-Over.ttf" type="DynamicFontData" id=2]
+
+[sub_resource type="DynamicFont" id=1]
+size = 50
+font_data = ExtResource( 2 )
+
+[node name="Card" type="MarginContainer"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -150.0
+margin_top = -250.0
+margin_right = 100.0
+margin_bottom = 100.0
+rect_min_size = Vector2( 250, 350 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Back" type="ColorRect" parent="."]
+margin_right = 250.0
+margin_bottom = 350.0
+color = Color( 0.721569, 0.235294, 0.235294, 1 )
+
+[node name="Artwork" type="Sprite" parent="."]
+position = Vector2( 126, 142 )
+region_rect = Rect2( 204.8, 204.8, 0, 0 )
+
+[node name="TextContainer" type="VBoxContainer" parent="."]
+margin_right = 250.0
+margin_bottom = 350.0
+
+[node name="MarginContainer" type="MarginContainer" parent="TextContainer"]
+margin_right = 250.0
+margin_bottom = 3.0
+rect_min_size = Vector2( 0, 3 )
+
+[node name="TopBar" type="HBoxContainer" parent="TextContainer"]
+margin_top = 7.0
+margin_right = 250.0
+margin_bottom = 36.0
+alignment = 1
+
+[node name="CostMargin" type="MarginContainer" parent="TextContainer/TopBar"]
+margin_left = 75.0
+margin_right = 175.0
+margin_bottom = 29.0
+rect_min_size = Vector2( 100, 0 )
+
+[node name="ColorRect" type="ColorRect" parent="TextContainer/TopBar/CostMargin"]
+modulate = Color( 0, 0, 0, 0.4 )
+margin_right = 100.0
+margin_bottom = 29.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CenterContainer" type="CenterContainer" parent="TextContainer/TopBar/CostMargin"]
+margin_right = 100.0
+margin_bottom = 29.0
+
+[node name="Cost" type="Label" parent="TextContainer/TopBar/CostMargin/CenterContainer"]
+margin_left = 29.0
+margin_right = 70.0
+margin_bottom = 29.0
+custom_fonts/font = SubResource( 1 )
+custom_colors/font_color = Color( 0.964706, 0.827451, 0.0862745, 1 )
+custom_colors/font_outline_modulate = Color( 0.968627, 0.980392, 0.992157, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "Cost"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TopBarEmptySpace" type="MarginContainer" parent="TextContainer"]
+margin_top = 40.0
+margin_right = 250.0
+margin_bottom = 250.0
+rect_min_size = Vector2( 0, 210 )
+
+[node name="NameMargin" type="MarginContainer" parent="TextContainer"]
+margin_top = 254.0
+margin_right = 250.0
+margin_bottom = 283.0
+rect_min_size = Vector2( 100, 0 )
+
+[node name="ColorRect" type="ColorRect" parent="TextContainer/NameMargin"]
+modulate = Color( 0, 0, 0, 0.4 )
+margin_right = 250.0
+margin_bottom = 29.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CenterContainer" type="CenterContainer" parent="TextContainer/NameMargin"]
+margin_right = 250.0
+margin_bottom = 29.0
+
+[node name="Name" type="Label" parent="TextContainer/NameMargin/CenterContainer"]
+margin_left = 99.0
+margin_right = 151.0
+margin_bottom = 29.0
+custom_fonts/font = SubResource( 1 )
+custom_colors/font_color = Color( 0.964706, 0.827451, 0.0862745, 1 )
+custom_colors/font_outline_modulate = Color( 0.968627, 0.980392, 0.992157, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "Name"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="NameMarginEmptySpace" type="MarginContainer" parent="TextContainer"]
+margin_top = 287.0
+margin_right = 250.0
+margin_bottom = 297.0
+rect_min_size = Vector2( 0, 10 )
+
+[node name="BottomBar" type="HBoxContainer" parent="TextContainer"]
+margin_top = 301.0
+margin_right = 250.0
+margin_bottom = 330.0
+alignment = 1
+
+[node name="DefenseMargin" type="MarginContainer" parent="TextContainer/BottomBar"]
+margin_left = 23.0
+margin_right = 123.0
+margin_bottom = 29.0
+rect_min_size = Vector2( 100, 0 )
+
+[node name="ColorRect" type="ColorRect" parent="TextContainer/BottomBar/DefenseMargin"]
+modulate = Color( 0, 0, 0, 0.4 )
+margin_right = 100.0
+margin_bottom = 29.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CenterContainer" type="CenterContainer" parent="TextContainer/BottomBar/DefenseMargin"]
+margin_right = 100.0
+margin_bottom = 29.0
+
+[node name="Defense" type="Label" parent="TextContainer/BottomBar/DefenseMargin/CenterContainer"]
+margin_left = 9.0
+margin_right = 91.0
+margin_bottom = 29.0
+custom_fonts/font = SubResource( 1 )
+custom_colors/font_color = Color( 0.964706, 0.827451, 0.0862745, 1 )
+custom_colors/font_outline_modulate = Color( 0.968627, 0.980392, 0.992157, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "Defense"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="AttackMargin" type="MarginContainer" parent="TextContainer/BottomBar"]
+margin_left = 127.0
+margin_right = 227.0
+margin_bottom = 29.0
+rect_min_size = Vector2( 100, 0 )
+
+[node name="ColorRect" type="ColorRect" parent="TextContainer/BottomBar/AttackMargin"]
+modulate = Color( 0, 0, 0, 0.4 )
+margin_right = 100.0
+margin_bottom = 29.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CenterContainer" type="CenterContainer" parent="TextContainer/BottomBar/AttackMargin"]
+margin_right = 100.0
+margin_bottom = 29.0
+
+[node name="Attack" type="Label" parent="TextContainer/BottomBar/AttackMargin/CenterContainer"]
+margin_left = 17.0
+margin_right = 82.0
+margin_bottom = 29.0
+custom_fonts/font = SubResource( 1 )
+custom_colors/font_color = Color( 0.964706, 0.827451, 0.0862745, 1 )
+custom_colors/font_outline_modulate = Color( 0.968627, 0.980392, 0.992157, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "Attack"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}

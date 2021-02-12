@@ -16,6 +16,9 @@ func _ready():
 	matchmaking_popup = get_node("MatchmakingPopup")
 	matchmaking_popup.popup_exclusive = true # stops the popup from disappearing when clicked outside of it
 	add_child(login_screen)
+	var card = load("res://scenes/game/Card.tscn").instance()
+	card.init("Big_Arei_Yanagi_21_12_11.png")
+	$".".add_child(card)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

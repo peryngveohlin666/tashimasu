@@ -1,9 +1,7 @@
 extends Control
 
-
 var username_field
 var password_field
-
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -16,7 +14,6 @@ func _ready():
 	login_button.connect("pressed", self, "_on_login_pressed")
 	register_button.connect("pressed", self, "_on_register_pressed")
 	
-
 func _on_login_pressed():
 	var username = str(username_field.get_text())
 	var password = str(password_field.get_text())
