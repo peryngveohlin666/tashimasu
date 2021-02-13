@@ -3,7 +3,7 @@ extends Node
 
 var title_screen = load("res://scenes/ui/screens/TitleScreen.tscn").instance() # create an instance of the scene "title"
 var login_screen = load("res://scenes/ui/screens/LoginScreen.tscn").instance()
-var game_screen = load("res://scenes/game/Game.tscn")
+var game_screen = load("res://scenes/game/Game.tscn").instance()
 var client : Node # the client code instance that is attached to this node
 var error_popup : Node
 var matchmaking_popup : Node
@@ -15,10 +15,7 @@ func _ready():
 	error_popup = get_node("ErrorPopup")
 	matchmaking_popup = get_node("MatchmakingPopup")
 	matchmaking_popup.popup_exclusive = true # stops the popup from disappearing when clicked outside of it
-	add_child(login_screen)
-	var card = load("res://scenes/game/Card.tscn").instance()
-	card.init("Big_Arei_Yanagi_21_12_11.png")
-	$".".add_child(card)
+	add_child(game_screen)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

@@ -27,6 +27,8 @@ const ENEMY_TURN_MESSAGE: String = "ENEMYTURN"
 
 const YOUR_TURN_MESSAGE: String = "YOURTURN"
 
+const DRAW_A_CARD_MESSAGE: String = "DRAW"
+
 var client: WebSocketClient
 var cert : X509Certificate
 
@@ -64,10 +66,7 @@ func _on_received_data() -> void:
 	var packet: PoolByteArray = client.get_peer(1).get_packet()
 	var parsed_data: String = packet.get_string_from_utf8()
 	print(parsed_data)
-	print(_get_protocol_message(parsed_data))
-	print(_get_data(parsed_data))
 	# ree godot doesn't have a switch-case statement this is stupid
-	print(parsed_data)
 	if(_get_protocol_message(parsed_data) == SUCCESS_LOGIN_RESPONSE):
 		auth_token = _get_data(parsed_data)[0]
 		get_parent().switch_to_menu_from_login_screen()
@@ -80,6 +79,9 @@ func _on_received_data() -> void:
 		get_parent().my_turn = true
 	if(_get_protocol_message(parsed_data) == ENEMY_TURN_MESSAGE):
 		get_parent().my_turn = false
+	if(_get_protocol_message(parsed_data) == DRAW_A_CARD_MESSAGE):
+		get_parent().get_node("./Game").draw_a_card(_get_data(parsed_data)[0])
+
 	
 # a function to send message to the server
 func send_message(message: String) -> void:
