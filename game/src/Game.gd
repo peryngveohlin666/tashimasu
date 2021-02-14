@@ -61,6 +61,8 @@ enum {
 func _input(event):
 	if Input.is_action_just_released("leftclick"):
 		draw_a_card("Big_Arei_Yanagi_21_12_11.png")
+	if Input.is_action_just_released("rightclick"):
+		play_enemy_card("Big_Arei_Yanagi_21_12_11.png")
 
 func draw_a_card(cardname : String):
 		card_angle = PI/2 + between_cards*(len(hand)/2 - len(hand))
@@ -142,3 +144,25 @@ func hit_enemy(damage : int):
 
 func _on_SkipButton_button_down() -> void:
 	update_turn_info(false)
+
+# play an enemy card
+func play_enemy_card(card_name : String):
+	print("play enemy")
+	var new_card = card.instance()
+	# resize card
+	new_card.rect_scale = card_scale
+	new_card.init(card_name) # initialize the cards attributes from the name
+	new_card.rect_position = get_node("EnemyHead/ColorRect").rect_position
+	for slot in enemy_slots:
+		if slot.is_empty:
+			new_card.start_position = get_node("EnemyHead/ColorRect").rect_position
+			new_card.target_position = slot.rect_position
+			slot.is_empty = false
+			new_card.slot = slot
+			new_card.moving_to_table = true
+			break
+	new_card.setup = true
+	enemy_table.append(new_card)
+	new_card.state = on_table
+	
+	add_child(new_card)

@@ -226,6 +226,9 @@ script = ExtResource( 4 )
 modulate = Color( 0.639216, 0.0980392, 0.0980392, 1 )
 margin_right = 150.0
 margin_bottom = 150.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="X" type="Label" parent="EnemyHead"]
 margin_left = 40.0
