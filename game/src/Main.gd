@@ -7,7 +7,6 @@ var game_screen = load("res://scenes/game/Game.tscn").instance()
 var client : Node # the client code instance that is attached to this node
 var error_popup : Node
 var matchmaking_popup : Node
-var my_turn : bool
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

@@ -4,6 +4,12 @@ extends Node2D
 const card = preload("res://scenes/game/Card.tscn")
 const card_scale = Vector2(0.75, 0.75)
 
+# gui stuff that tracks our health, enemy health and if it is our turn
+var health = 40
+var enemy_health = 40
+var mana = 0
+var my_turn : bool
+
 # cards on places and the deck size
 var hand : Array
 var table : Array
@@ -42,19 +48,22 @@ func _input(event):
 func draw_a_card(cardname : String):
 		card_angle = PI/2 + between_cards*(len(hand)/2 - len(hand))
 		var new_card = card.instance()
+		# resize card
+		new_card.rect_scale = card_scale
 		new_card.init(cardname) # initialize the cards attributes from the name
 		new_card.rect_position = $Deck.position # to stop clipping
 		# set the target and the start position for animating card draw also the state
 		new_card.target_position = hand_location + Vector2(hand_horizontal_radius * cos(card_angle), -hand_vertical_radius * sin(card_angle))
+		new_card.default_position = new_card.target_position
 		new_card.start_position = $Deck.position
 		new_card.state = move_to_hand
 		# set the rotation
 		new_card.start_rotation = 0
 		new_card.target_rotation = (90 - rad2deg(card_angle))/4
+		new_card.default_rotation = new_card.target_rotation
 		# add card to the list of cards in my hand
 		hand.append(new_card)
-		# resize card
-		new_card.rect_scale = card_scale
+		new_card.card_no = len(hand) # set the card no to the size of hand
 		# reorganise the hand according to the card
 		_reorganise_hand()
 		# render card
@@ -68,10 +77,13 @@ func _reorganise_hand():
 	for ca in hand: # reorganize
 		card_angle = PI/2 + between_cards*(len(hand)/2 - card_no)
 		ca.target_position = hand_location + Vector2(hand_horizontal_radius * cos(card_angle), -hand_vertical_radius * sin(card_angle))
+		ca.default_position = ca.target_position
 		# set the rotation
 		ca.start_rotation = 0
 		ca.target_rotation = (90 - rad2deg(card_angle))/4
+		ca.default_rotation = ca.target_rotation
 		card_no += 1
+		ca.card_no = card_no # set the index of the card
 		if ca.state == in_hand:
 			ca.state = reorganise_hand
 			ca.start_position = ca.rect_position

@@ -195,3 +195,10 @@ valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Focus" type="TextureButton" parent="."]
+margin_right = 250.0
+margin_bottom = 350.0
+expand = true
+[connection signal="mouse_entered" from="Focus" to="." method="_on_Focus_mouse_entered"]
+[connection signal="mouse_exited" from="Focus" to="." method="_on_Focus_mouse_exited"]
