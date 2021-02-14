@@ -4,6 +4,8 @@ extends Node2D
 const card = preload("res://scenes/game/Card.tscn")
 const card_scale = Vector2(0.75, 0.75)
 
+const card_slot = preload("res://scenes/game/CardSlot.tscn")
+
 # gui stuff that tracks our health, enemy health and if it is our turn
 var health = 40
 var enemy_health = 40
@@ -17,6 +19,8 @@ var table : Array
 var enemy_table : Array
 var deck_size : int = 40
 var enemy_deck_size : int = 40
+var friendly_slots = []
+var enemy_slots = []
 
 # angle between each card
 var between_cards = 0.15
@@ -31,7 +35,18 @@ var card_angle = deg2rad(90) + 0.5
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
+	for i in 5:
+		var new_friendly_slot = card_slot.instance()
+		new_friendly_slot.rect_position = Vector2(200 + 250 * i, 550)
+		new_friendly_slot.get_child(0).color =  Color (0, 100, 200, 100)
+		friendly_slots.append(new_friendly_slot)
+		add_child(new_friendly_slot)
+	for i in 5:
+		var new_enemy_slot = card_slot.instance()
+		new_enemy_slot.rect_position = Vector2(200 + 250 * i, 250)
+		new_enemy_slot.enemy_slot = true
+		enemy_slots.append(new_enemy_slot)
+		add_child(new_enemy_slot)
 
 # there was no other way to move the enum from Card.gd here
 enum {
@@ -124,8 +139,6 @@ func take_damage(damage : int):
 func hit_enemy(damage : int):
 	enemy_health -= damage
 	$EnemyHealth.text = str(health)
-			
-
 
 func _on_SkipButton_button_down() -> void:
 	update_turn_info(false)

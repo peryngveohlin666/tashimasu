@@ -1,6 +1,7 @@
 extends MarginContainer
 
 # card attributes
+var enemy_card = false
 var file_name : String
 var image_location : String
 var card_type : String
@@ -26,6 +27,12 @@ var zoom_scale = Vector2(1, 1)
 var reorganize_neighbors = true
 var card_in_hand_count = 0
 var card_no = 0
+var card_selected = true
+var old_state
+# check if the card is moving to table
+var moving_to_table = false
+# check which slot the card is put in
+var slot
 
 # card state
 enum {
@@ -66,8 +73,6 @@ func initialize_attributes(fn):
 	self.defense = int(attributes[3])
 	self.attack = int(attributes[4])
 	self.cost = int(attributes[5])
-	
-
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta: float) -> void:
@@ -75,9 +80,38 @@ func _physics_process(delta: float) -> void:
 		in_hand:
 			pass
 		on_table:
-			pass
+			if setup:
+				setup()
+			# move the card to the table
+			if moving_to_table:
+				start_position = rect_position
+				target_position = slot.rect_position
+				target_rotation = 0
+				var target_scale = Vector2(0.75, 0.75)
+				if time <= 1:
+					# slowly move the position
+					rect_position = start_position.linear_interpolate(target_position, time)
+					# slowly move the rotation
+					rect_rotation = start_rotation * (1-time) + (target_rotation * time)
+					rect_scale = rect_scale * (1-time) + (target_scale * time)
+					time+=delta/1
+				else:
+					rect_position = target_position
+					rect_rotation = target_rotation
+					rect_scale = target_scale
+					time = 0
+					moving_to_table = false
 		under_mouse:
-			pass
+			if time <= 1:
+				# slowly move the position
+				rect_position = start_position.linear_interpolate(get_global_mouse_position() - rect_min_size/2, time)
+				# slowly move the rotation
+				rect_rotation = start_rotation * (1-time) + (0 * time)
+				time+=delta/0.05
+				print("under")
+			else:
+				rect_position = get_global_mouse_position() - rect_min_size/2
+				rect_rotation = 0
 		focused_in_hand:
 			if setup:
 				setup()
@@ -185,3 +219,41 @@ func reset_card(card_num):
 	neighbour_card.target_position = neighbour_card.default_position
 	neighbour_card.setup = true
 	neighbour_card.state = reorganise_hand
+	
+func _input(event: InputEvent) -> void:
+	match state:
+		focused_in_hand, under_mouse:
+			# pick up the card
+			if event.is_action_pressed("leftclick"):
+				if card_selected:
+					state = under_mouse
+					setup = true
+					old_state = state
+					card_selected = false
+			# play a card
+			if event.is_action_released("leftclick"):
+				print(card_selected)
+				if card_selected == false:
+					var card_slots = get_parent().friendly_slots
+					var mouse_position = get_global_mouse_position()
+					# if the mouse is inside the card playing area
+					if mouse_position.x <= 1500 && mouse_position.x >= 110 && mouse_position.y <= 800 &&  mouse_position.y >= 200:
+						for cs in card_slots:
+							if cs.is_empty && cs.enemy_slot == false:
+								setup = true
+								moving_to_table = true
+								get_parent().table.append($".")
+								state = on_table
+								slot = cs
+								get_parent().hand.erase($".")
+								cs.is_empty = false
+								break
+			# return the card back on right click
+			if event.is_action_pressed("rightclick"):
+					state = reorganise_hand
+					setup = true
+					target_position = default_position
+					card_selected = true
+			
+				
+				

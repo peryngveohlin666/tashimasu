@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://src/CardSlot.gd" type="Script" id=1]
+
+[node name="CardSlot" type="MarginContainer"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -87.5
+margin_top = -122.5
+margin_right = 87.5
+margin_bottom = 122.5
+rect_min_size = Vector2( 175, 245 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="."]
+margin_right = 175.0
+margin_bottom = 245.0
+color = Color( 0.890196, 0.109804, 0.109804, 0.54902 )

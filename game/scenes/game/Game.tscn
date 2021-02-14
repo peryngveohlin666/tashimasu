@@ -1,8 +1,9 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://src/Game.gd" type="Script" id=1]
 [ext_resource path="res://assets/fonts/DynamicFont200.tres" type="DynamicFont" id=2]
 [ext_resource path="res://assets/fonts/Game-Over.ttf" type="DynamicFontData" id=3]
+[ext_resource path="res://src/EnemyHead.gd" type="Script" id=4]
 
 [sub_resource type="Shader" id=1]
 
@@ -13,20 +14,24 @@ shader = SubResource( 1 )
 size = 200
 font_data = ExtResource( 3 )
 
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0.721569, 0.235294, 0.235294, 1 )
+
+[sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color( 0.721569, 0.235294, 0.235294, 1 )
+
 [sub_resource type="StyleBoxFlat" id=6]
 bg_color = Color( 0.721569, 0.235294, 0.235294, 1 )
 
 [sub_resource type="StyleBoxFlat" id=7]
-bg_color = Color( 0.721569, 0.235294, 0.235294, 1 )
-
-[sub_resource type="StyleBoxFlat" id=8]
-bg_color = Color( 0.721569, 0.235294, 0.235294, 1 )
-
-[sub_resource type="StyleBoxFlat" id=5]
 bg_color = Color( 1, 0, 0, 0.745098 )
 
-[sub_resource type="DynamicFont" id=4]
+[sub_resource type="DynamicFont" id=8]
 size = 100
+font_data = ExtResource( 3 )
+
+[sub_resource type="DynamicFont" id=9]
+size = 250
 font_data = ExtResource( 3 )
 
 [node name="Game" type="Node2D"]
@@ -43,6 +48,10 @@ rect_min_size = Vector2( 1920, 1080 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="CardSlots" type="Node" parent="."]
+
+[node name="EnemyCardSlots" type="Node" parent="."]
 
 [node name="Deck" type="Node2D" parent="."]
 position = Vector2( 1688, 744 )
@@ -199,12 +208,32 @@ margin_top = 568.0
 margin_right = 1902.0
 margin_bottom = 688.0
 rect_min_size = Vector2( 230, 120 )
-custom_styles/hover = SubResource( 6 )
-custom_styles/focus = SubResource( 7 )
-custom_styles/disabled = SubResource( 8 )
-custom_styles/normal = SubResource( 5 )
-custom_fonts/font = SubResource( 4 )
+custom_styles/hover = SubResource( 4 )
+custom_styles/focus = SubResource( 5 )
+custom_styles/disabled = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
+custom_fonts/font = SubResource( 8 )
 text = "End Turn"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="EnemyHead" type="Node2D" parent="."]
+position = Vector2( 712, 0 )
+script = ExtResource( 4 )
+
+[node name="ColorRect" type="ColorRect" parent="EnemyHead"]
+modulate = Color( 0.639216, 0.0980392, 0.0980392, 1 )
+margin_right = 150.0
+margin_bottom = 150.0
+
+[node name="X" type="Label" parent="EnemyHead"]
+margin_left = 40.0
+margin_top = -8.0
+margin_right = 103.0
+margin_bottom = 134.0
+custom_fonts/font = SubResource( 9 )
+text = "X"
 __meta__ = {
 "_edit_use_anchors_": false
 }
