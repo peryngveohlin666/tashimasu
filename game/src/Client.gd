@@ -78,7 +78,7 @@ func _on_received_data() -> void:
 	if(_get_protocol_message(parsed_data) == YOUR_TURN_MESSAGE):
 		get_parent().my_turn = true
 	if(_get_protocol_message(parsed_data) == ENEMY_TURN_MESSAGE):
-		get_parent().my_turn = false
+		get_parent().get_node("./Game").my_turn = false
 	if(_get_protocol_message(parsed_data) == DRAW_A_CARD_MESSAGE):
 		get_parent().get_node("./Game").draw_a_card(_get_data(parsed_data)[0])
 

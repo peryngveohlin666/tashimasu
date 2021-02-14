@@ -1,12 +1,33 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://src/Game.gd" type="Script" id=1]
 [ext_resource path="res://assets/fonts/DynamicFont200.tres" type="DynamicFont" id=2]
+[ext_resource path="res://assets/fonts/Game-Over.ttf" type="DynamicFontData" id=3]
 
 [sub_resource type="Shader" id=1]
 
 [sub_resource type="ShaderMaterial" id=2]
 shader = SubResource( 1 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 200
+font_data = ExtResource( 3 )
+
+[sub_resource type="StyleBoxFlat" id=6]
+bg_color = Color( 0.721569, 0.235294, 0.235294, 1 )
+
+[sub_resource type="StyleBoxFlat" id=7]
+bg_color = Color( 0.721569, 0.235294, 0.235294, 1 )
+
+[sub_resource type="StyleBoxFlat" id=8]
+bg_color = Color( 0.721569, 0.235294, 0.235294, 1 )
+
+[sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color( 1, 0, 0, 0.745098 )
+
+[sub_resource type="DynamicFont" id=4]
+size = 100
+font_data = ExtResource( 3 )
 
 [node name="Game" type="Node2D"]
 script = ExtResource( 1 )
@@ -27,7 +48,9 @@ __meta__ = {
 position = Vector2( 1688, 744 )
 
 [node name="ColorRect" type="ColorRect" parent="Deck"]
-rect_min_size = Vector2( 200, 280 )
+margin_right = 187.5
+margin_bottom = 262.5
+rect_min_size = Vector2( 187.5, 262.5 )
 color = Color( 0.964706, 0.827451, 0.0862745, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -38,10 +61,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -7.62939e-06
-margin_top = 12.0
-margin_right = 88.0
-margin_bottom = 125.0
+margin_left = -5.75001
+margin_top = 28.75
+margin_right = 82.25
+margin_bottom = 141.75
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -55,13 +78,104 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Health" type="Label" parent="Deck"]
+margin_right = 88.0
+margin_bottom = 229.0
+custom_fonts/font = SubResource( 3 )
+custom_colors/font_color = Color( 0.803922, 0.117647, 0.117647, 1 )
+text = "40
+"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="EnemyDeck" type="Node2D" parent="."]
-position = Vector2( 1888, 336 )
+position = Vector2( 1875.5, 328 )
 rotation = 3.14159
 
 [node name="ColorRect" type="ColorRect" parent="EnemyDeck"]
-rect_min_size = Vector2( 200, 280 )
+margin_right = 187.5
+margin_bottom = 262.5
+rect_min_size = Vector2( 187.5, 262.5 )
 color = Color( 0.964706, 0.827451, 0.0862745, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="EnemyCardCount" type="Label" parent="EnemyDeck"]
+margin_left = 93.7493
+margin_top = 288.0
+margin_right = 181.749
+margin_bottom = 401.0
+rect_rotation = -180.0
+custom_fonts/font = ExtResource( 2 )
+text = "40"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="EnemyHealth" type="Label" parent="EnemyDeck"]
+margin_left = 187.5
+margin_top = 136.0
+margin_right = 275.5
+margin_bottom = 365.0
+rect_rotation = 180.0
+custom_fonts/font = SubResource( 3 )
+custom_colors/font_color = Color( 0.803922, 0.117647, 0.117647, 1 )
+text = "40
+"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Mana" type="Node2D" parent="."]
+position = Vector2( 1728, 637 )
+
+[node name="ColorRect" type="ColorRect" parent="Mana"]
+modulate = Color( 0.0941176, 0.117647, 0.764706, 0.709804 )
+margin_right = 60.0
+margin_bottom = 60.0
+rect_min_size = Vector2( 100, 100 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ManaCount" type="Label" parent="Mana"]
+margin_top = -72.0
+margin_right = 88.0
+margin_bottom = 157.0
+custom_fonts/font = ExtResource( 2 )
+text = "0"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="EnemyMana" type="Node2D" parent="."]
+position = Vector2( 1728, 336 )
+
+[node name="ColorRect" type="ColorRect" parent="EnemyMana"]
+modulate = Color( 0.0941176, 0.117647, 0.764706, 0.709804 )
+margin_right = 60.0
+margin_bottom = 60.0
+rect_min_size = Vector2( 100, 100 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="EnemyManaCount" type="Label" parent="EnemyMana"]
+margin_top = -72.0
+margin_right = 88.0
+margin_bottom = 157.0
+custom_fonts/font = ExtResource( 2 )
+text = "0"
+align = 1
+valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -75,3 +189,23 @@ color = Color( 0.968627, 0.980392, 0.992157, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Turn" type="Node2D" parent="."]
+position = Vector2( 0, -96 )
+
+[node name="SkipButton" type="Button" parent="Turn"]
+margin_left = 1672.0
+margin_top = 568.0
+margin_right = 1902.0
+margin_bottom = 688.0
+rect_min_size = Vector2( 230, 120 )
+custom_styles/hover = SubResource( 6 )
+custom_styles/focus = SubResource( 7 )
+custom_styles/disabled = SubResource( 8 )
+custom_styles/normal = SubResource( 5 )
+custom_fonts/font = SubResource( 4 )
+text = "End Turn"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+[connection signal="button_down" from="Turn/SkipButton" to="." method="_on_SkipButton_button_down"]

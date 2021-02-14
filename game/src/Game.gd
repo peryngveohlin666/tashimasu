@@ -8,6 +8,7 @@ const card_scale = Vector2(0.75, 0.75)
 var health = 40
 var enemy_health = 40
 var mana = 0
+var enemy_mana = 0
 var my_turn : bool
 
 # cards on places and the deck size
@@ -15,6 +16,7 @@ var hand : Array
 var table : Array
 var enemy_table : Array
 var deck_size : int = 40
+var enemy_deck_size : int = 40
 
 # angle between each card
 var between_cards = 0.15
@@ -91,3 +93,39 @@ func _reorganise_hand():
 			# fix the jittering by teleporting the card secretly
 			ca.start_position = ca.target_position - (ca.target_position - ca.rect_position/(1-ca.time))
 			
+func enemy_draw_a_card():
+	enemy_deck_size -=1
+	$EnemyDeck/EnemyCardCount.text = str(enemy_deck_size)
+
+# one up for mana and enemy mana
+func add_mana():
+	mana += 1
+	$Mana/ManaCount.text = str(mana)
+
+func add_enemy_mana():
+	enemy_mana += 1
+	$EnemyMana/EnemyManaCount.text = str(enemy_mana)
+	
+func update_turn_info(mt : bool):
+	my_turn = mt
+	# enable clicking if my turn and update the text
+	if my_turn:
+		$Turn/SkipButton.text = "End Turn"
+		$Turn/SkipButton.disabled = false
+	else:
+		# disable clicking disable change text to enemy turn
+		$Turn/SkipButton.text = "Enemy Turn"
+		$Turn/SkipButton.disabled = true
+		
+func take_damage(damage : int):
+	health -= damage
+	$Deck/Health.text = str(health)
+	
+func hit_enemy(damage : int):
+	enemy_health -= damage
+	$EnemyHealth.text = str(health)
+			
+
+
+func _on_SkipButton_button_down() -> void:
+	update_turn_info(false)
