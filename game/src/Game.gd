@@ -152,10 +152,12 @@ func play_enemy_card(card_name : String):
 	# resize card
 	new_card.rect_scale = card_scale
 	new_card.init(card_name) # initialize the cards attributes from the name
-	new_card.rect_position = get_node("EnemyHead/ColorRect").rect_position
+	new_card.rect_position = get_node("EnemyHead").position
+	new_card.default_position = new_card.rect_position
+	new_card.enemy_card = true
 	for slot in enemy_slots:
 		if slot.is_empty:
-			new_card.start_position = get_node("EnemyHead/ColorRect").rect_position
+			new_card.start_position = get_node("EnemyHead").position
 			new_card.target_position = slot.rect_position
 			slot.is_empty = false
 			new_card.slot = slot

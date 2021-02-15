@@ -33,6 +33,16 @@ var old_state
 var moving_to_table = false
 # check which slot the card is put in
 var slot
+# check if we should draw the attack line
+var attacking = false
+# check if the mouse is inside the card
+var mouse_is_inside = false
+# the card we are attacking at
+var attacking_at : Node
+# check if the attack is on the way or on the way back
+var on_the_way = false
+# old position
+var previous_position = Vector2()
 
 # card state
 enum {
@@ -41,7 +51,8 @@ enum {
 	under_mouse,
 	focused_in_hand,
 	move_to_hand,
-	reorganise_hand
+	reorganise_hand,
+	in_attack
 }
 
 var state = in_hand
@@ -77,6 +88,34 @@ func initialize_attributes(fn):
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta: float) -> void:
 	match state:
+		in_attack:
+			if setup:
+				setup()
+			if on_the_way:
+				if time <= 1:
+					# slowly move the position
+					rect_position = start_position.linear_interpolate(target_position, time)
+					# slowly move the rotation
+					rect_rotation = start_rotation * (1-time) + (target_rotation * time)
+					time+=delta/0.25
+				else:
+					rect_position = target_position
+					on_the_way = false
+					setup = true
+					time = 0
+			elif on_the_way == false:
+				target_position = previous_position
+				if time <= 1:
+					# slowly move the position
+					rect_position = start_position.linear_interpolate(target_position, time)
+					# slowly move the rotation
+					rect_rotation = start_rotation * (1-time) + (target_rotation * time)
+					time+=delta/0.25
+				else:
+					rect_position = target_position
+					on_the_way = false
+					time = 0
+					state = on_table
 		in_hand:
 			pass
 		on_table:
@@ -177,6 +216,7 @@ func _physics_process(delta: float) -> void:
 				if card_no -3 >= 0:
 					reset_card(card_no -3)
 				reorganize_neighbors = true
+	update()
 
 func setup():
 	start_position = rect_position
@@ -187,6 +227,8 @@ func setup():
 	setup = false
 
 func _on_Focus_mouse_entered() -> void:
+	print("entered")
+	mouse_is_inside = true
 	match state:
 		in_hand, reorganise_hand:
 			setup = true
@@ -196,6 +238,7 @@ func _on_Focus_mouse_entered() -> void:
 			state = focused_in_hand
 
 func _on_Focus_mouse_exited() -> void:
+	mouse_is_inside = false
 	match state:
 		focused_in_hand:
 			# restore the card pos and rot
@@ -254,6 +297,38 @@ func _input(event: InputEvent) -> void:
 					setup = true
 					target_position = default_position
 					card_selected = true
-			
-				
-				
+		on_table:
+			if event.is_action_pressed("leftclick") && attacking == false && enemy_card == false && mouse_is_inside:
+				attacking = true
+			if event.is_action_released("leftclick") && attacking == true && enemy_card == false:
+				attacking = false
+				var enemy_cards = get_parent().enemy_table
+				var mouz_loc = get_global_mouse_position()
+				var enemy_head = get_parent().get_node("EnemyHead")
+				var real_head_size = enemy_head.get_node("ColorRect").rect_size
+				var he_mid = enemy_head.position + real_head_size/2
+				# check if attacking the head and attack it
+				if he_mid.x - real_head_size.x/2 < mouz_loc.x && he_mid.x + real_head_size.x/2 > mouz_loc.x && he_mid.y - real_head_size.y/2 < mouz_loc.y && he_mid.y + real_head_size.y/2 > mouz_loc.y :
+						previous_position = rect_position
+						setup = true
+						state = in_attack
+						target_position = enemy_head.position
+						on_the_way = true
+				for ca in enemy_cards:
+					# if the mouse is in the enemy card attack it
+					var real_ca_size = ca.rect_size * ca.rect_scale
+					var ca_mid = ca.rect_position + real_ca_size/2
+					if ca_mid.x - real_ca_size.x/2 < mouz_loc.x && ca_mid.x + real_ca_size.x/2 > mouz_loc.x && ca_mid.y - real_ca_size.y/2 < mouz_loc.y && ca_mid.y + real_ca_size.y/2 > mouz_loc.y :
+						previous_position = rect_position
+						setup = true
+						state = in_attack
+						target_position = ca.rect_position
+						on_the_way = true
+						break
+						
+func _draw():
+	if attacking:
+		# now i can say that i hate local positions
+		# I mean what is their point, we can just use global positions for everything and nothing will be confusing
+		# anymore
+		draw_line(make_canvas_position_local(rect_position) + rect_size/2, get_local_mouse_position(), Color(1, 0, 0, 0.5), 25)
