@@ -55,7 +55,8 @@ enum {
 	under_mouse,
 	focused_in_hand,
 	move_to_hand,
-	reorganise_hand
+	reorganise_hand,
+	in_attack
 }
 
 func _input(event):
@@ -63,6 +64,7 @@ func _input(event):
 		draw_a_card("Big_Arei_Yanagi_21_12_11.png")
 	if Input.is_action_just_released("rightclick"):
 		play_enemy_card("Big_Arei_Yanagi_21_12_11.png")
+		enemy_attack("Big_Arei_Yanagi_21_12_11.png", "Big_Arei_Yanagi_21_12_11.png")
 
 func draw_a_card(cardname : String):
 		card_angle = PI/2 + between_cards*(len(hand)/2 - len(hand))
@@ -147,24 +149,48 @@ func _on_SkipButton_button_down() -> void:
 
 # play an enemy card
 func play_enemy_card(card_name : String):
-	print("play enemy")
-	var new_card = card.instance()
-	# resize card
-	new_card.rect_scale = card_scale
-	new_card.init(card_name) # initialize the cards attributes from the name
-	new_card.rect_position = get_node("EnemyHead").position
-	new_card.default_position = new_card.rect_position
-	new_card.enemy_card = true
-	for slot in enemy_slots:
-		if slot.is_empty:
-			new_card.start_position = get_node("EnemyHead").position
-			new_card.target_position = slot.rect_position
-			slot.is_empty = false
-			new_card.slot = slot
-			new_card.moving_to_table = true
-			break
-	new_card.setup = true
-	enemy_table.append(new_card)
-	new_card.state = on_table
+	if len(enemy_table) <= 4:
+		print("play enemy")
+		var new_card = card.instance()
+		# resize card
+		new_card.rect_scale = card_scale
+		new_card.init(card_name) # initialize the cards attributes from the name
+		new_card.rect_position = get_node("EnemyHead").position
+		new_card.default_position = new_card.rect_position
+		new_card.enemy_card = true
+		for slot in enemy_slots:
+			if slot.is_empty:
+				new_card.start_position = get_node("EnemyHead").position
+				new_card.target_position = slot.rect_position
+				slot.is_empty = false
+				new_card.slot = slot
+				new_card.moving_to_table = true
+				break
+		new_card.setup = true
+		enemy_table.append(new_card)
+		new_card.state = on_table
 	
-	add_child(new_card)
+		add_child(new_card)
+
+func enemy_attack(enemy_card_name : String, player_card_name : String):
+	var player_card # player card
+	var enemy_card # enemy card
+	# find the player card from the string
+	for pc in table:
+		if pc.file_name == player_card_name:
+			player_card = pc
+			break
+	# do the same for the enemy card
+	for ec in enemy_table:
+		if ec.file_name == player_card_name:
+			enemy_card = ec
+			break
+	if player_card && enemy_card:
+		enemy_card.last_attacked = player_card
+		# set the state and animation variables for the attack animation
+		enemy_card.setup = true
+		enemy_card.previous_position = enemy_card.rect_position
+		enemy_card.state = in_attack
+		enemy_card.on_the_way = true
+		enemy_card.target_position = player_card.rect_position
+	

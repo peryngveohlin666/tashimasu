@@ -43,6 +43,8 @@ var attacking_at : Node
 var on_the_way = false
 # old position
 var previous_position = Vector2()
+# last attacked card
+var last_attacked
 
 # card state
 enum {
@@ -103,6 +105,15 @@ func _physics_process(delta: float) -> void:
 					on_the_way = false
 					setup = true
 					time = 0
+					# kill the cards that need to die
+					if last_attacked.defense < defense:
+						last_attacked.die()
+					if last_attacked.defense == defense:
+						die()
+						last_attacked.die()
+					if last_attacked.defense > defense:
+						die()
+					last_attacked = null # just to avoid bugs bc i know this is going to happen
 			elif on_the_way == false:
 				target_position = previous_position
 				if time <= 1:
@@ -298,8 +309,10 @@ func _input(event: InputEvent) -> void:
 					target_position = default_position
 					card_selected = true
 		on_table:
+			# draw the attacking line
 			if event.is_action_pressed("leftclick") && attacking == false && enemy_card == false && mouse_is_inside:
 				attacking = true
+			# stop drawing the attacking line and if the mouse is inside a card or the enemy head attack the card or the head
 			if event.is_action_released("leftclick") && attacking == true && enemy_card == false:
 				attacking = false
 				var enemy_cards = get_parent().enemy_table
@@ -324,6 +337,7 @@ func _input(event: InputEvent) -> void:
 						state = in_attack
 						target_position = ca.rect_position
 						on_the_way = true
+						last_attacked = ca
 						break
 						
 func _draw():
@@ -332,3 +346,14 @@ func _draw():
 		# I mean what is their point, we can just use global positions for everything and nothing will be confusing
 		# anymore
 		draw_line(make_canvas_position_local(rect_position) + rect_size/2, get_local_mouse_position(), Color(1, 0, 0, 0.5), 25)
+		
+func die():
+	# remove from the table list
+	if enemy_card:
+		get_parent().enemy_table.erase(get_node("."))
+	else:
+		get_parent().table.erase(get_node("."))
+	if slot:
+		slot.is_empty = true
+		# remove the card
+		queue_free()
