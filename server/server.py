@@ -49,6 +49,14 @@ YOUR_TURN_MESSAGE = "YOURTURN"  # YUGIOH BABY
 
 ENEMY_TURN_MESSAGE = "ENEMYTURN"  # ummm
 
+DRAW_A_CARD_MESSAGE = "DRAW"
+
+PLAY_A_CARD_MESSAGE = "PLAY"  # play a card message a seperator and the card that the player is playing
+
+ENEMY_PLAY_MESSAGE = "ENEMYPLAY"  # when the enemy plays a card send this message to the other client to notify
+
+END_TURN_MESSAGE = "ENDTURN"
+
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 ssl_context.load_cert_chain('cert/tashimasu.crt', 'cert/tashimasu.key')
 
@@ -132,6 +140,7 @@ def get_starter_cards():
 # a function to constantly pair players who are matchmaking
 async def matchmake():
     print("matchmake")
+    print(matchmaking_users)
     while len(matchmaking_users) >= 2:
         p1 = matchmaking_users.pop(len(matchmaking_users) - 1)
         p2 = matchmaking_users.pop(len(matchmaking_users) - 1)
@@ -145,6 +154,18 @@ async def matchmake():
         await p2_socket.send(GAME_FOUND_MESSAGE)
         await p1_socket.send(YOUR_TURN_MESSAGE)
         await p2_socket.send(ENEMY_TURN_MESSAGE)
+
+        # sleep for half a second to make sure that the players load the scene so that there won't be a load of commands going through slowing their computer down
+        await asyncio.sleep(0.5)
+
+        # draw cards for the players one
+        for i in range(6):
+            card = p1.draw_a_card()
+            await p1_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
+            if i <= 5:
+                card2 = p2.draw_a_card()
+                await p2_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card2)
+
         print(p2_username + p1_username)
     await asyncio.sleep(1) # matchmake every second
     asyncio.create_task(matchmake())
@@ -167,7 +188,7 @@ def get_data(message):
 # get the deck of a user
 def get_deck(username):
     result = collection.find_one({"username": username})
-    return result["deck"].split(SEPERATOR)
+    return result["deck"].split(DATA_SEPERATOR)
 
 
 
@@ -183,11 +204,14 @@ async def respond(websocket, path):
     auth_key = ""
 
     player = Player.Player()
-    enemy_socket = websocket
+
     try:
         async for message in websocket:
             message = message.decode('UTF-8')
             protocol_message = get_protocol_message(message)
+
+            print(message)
+            print(protocol_message)
 
             # reset the response
             response = ""
@@ -201,12 +225,25 @@ async def respond(websocket, path):
             elif protocol_message == MATCHMAKE_MESSAGE:
                 if player not in matchmaking_users:
                     player.assign_deck(get_deck(username))
+                    print(player.deck)
                     matchmaking_users.append(player)
                 else:
                     response = ERROR_MESSAGE
+            elif protocol_message == PLAY_A_CARD_MESSAGE:
+                card_name = get_data(message)[0]
+                player.play_a_card(card_name)
+                (enemy_username, enemy_socket) = player.enemy.identifier
+                await enemy_socket.send(ENEMY_PLAY_MESSAGE + SEPERATOR + card_name)
+            elif protocol_message == END_TURN_MESSAGE:
+                (enemy_username, enemy_socket) = player.enemy.identifier
+                await enemy_socket.send(YOUR_TURN_MESSAGE)
+                await websocket.send(ENEMY_TURN_MESSAGE)
+                player.mana += 1
+                player.current_mana = player.mana
             else:
                 # get the proper function for the incoming protocol code and pass the message through to the necessary function
                 response = protocol_to_function[get_protocol_message(message)](message)
+
 
             print(response)
             print(message)

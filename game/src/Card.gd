@@ -105,14 +105,15 @@ func _physics_process(delta: float) -> void:
 					on_the_way = false
 					setup = true
 					time = 0
-					# kill the cards that need to die
-					if last_attacked.defense < defense:
-						last_attacked.die()
-					if last_attacked.defense == defense:
-						die()
-						last_attacked.die()
-					if last_attacked.defense > defense:
-						die()
+					if last_attacked:
+						# kill the cards that need to die
+						if last_attacked.defense < defense:
+							last_attacked.die()
+						if last_attacked.defense == defense:
+							die()
+							last_attacked.die()
+						if last_attacked.defense > defense:
+							die()
 					last_attacked = null # just to avoid bugs bc i know this is going to happen
 			elif on_the_way == false:
 				target_position = previous_position
@@ -285,7 +286,7 @@ func _input(event: InputEvent) -> void:
 					old_state = state
 					card_selected = false
 			# play a card
-			if event.is_action_released("leftclick"):
+			if event.is_action_released("leftclick") && get_parent().my_turn && get_parent().current_mana >= cost:
 				print(card_selected)
 				if card_selected == false:
 					var card_slots = get_parent().friendly_slots
@@ -301,44 +302,51 @@ func _input(event: InputEvent) -> void:
 								slot = cs
 								get_parent().hand.erase($".")
 								cs.is_empty = false
+								# update mana
+								get_parent().current_mana -= cost
+								get_parent().update_mana_text(str(get_parent().current_mana))
+								get_parent().reorganise_hand()
 								break
+						
 			# return the card back on right click
 			if event.is_action_pressed("rightclick"):
 					state = reorganise_hand
 					setup = true
 					target_position = default_position
 					card_selected = true
+					get_parent().reorganise_hand()
 		on_table:
-			# draw the attacking line
-			if event.is_action_pressed("leftclick") && attacking == false && enemy_card == false && mouse_is_inside:
-				attacking = true
-			# stop drawing the attacking line and if the mouse is inside a card or the enemy head attack the card or the head
-			if event.is_action_released("leftclick") && attacking == true && enemy_card == false:
-				attacking = false
-				var enemy_cards = get_parent().enemy_table
-				var mouz_loc = get_global_mouse_position()
-				var enemy_head = get_parent().get_node("EnemyHead")
-				var real_head_size = enemy_head.get_node("ColorRect").rect_size
-				var he_mid = enemy_head.position + real_head_size/2
-				# check if attacking the head and attack it
-				if he_mid.x - real_head_size.x/2 < mouz_loc.x && he_mid.x + real_head_size.x/2 > mouz_loc.x && he_mid.y - real_head_size.y/2 < mouz_loc.y && he_mid.y + real_head_size.y/2 > mouz_loc.y :
-						previous_position = rect_position
-						setup = true
-						state = in_attack
-						target_position = enemy_head.position
-						on_the_way = true
-				for ca in enemy_cards:
-					# if the mouse is in the enemy card attack it
-					var real_ca_size = ca.rect_size * ca.rect_scale
-					var ca_mid = ca.rect_position + real_ca_size/2
-					if ca_mid.x - real_ca_size.x/2 < mouz_loc.x && ca_mid.x + real_ca_size.x/2 > mouz_loc.x && ca_mid.y - real_ca_size.y/2 < mouz_loc.y && ca_mid.y + real_ca_size.y/2 > mouz_loc.y :
-						previous_position = rect_position
-						setup = true
-						state = in_attack
-						target_position = ca.rect_position
-						on_the_way = true
-						last_attacked = ca
-						break
+			if get_parent().my_turn:
+				# draw the attacking line
+				if event.is_action_pressed("leftclick") && attacking == false && enemy_card == false && mouse_is_inside:
+					attacking = true
+				# stop drawing the attacking line and if the mouse is inside a card or the enemy head attack the card or the head
+				if event.is_action_released("leftclick") && attacking == true && enemy_card == false:
+					attacking = false
+					var enemy_cards = get_parent().enemy_table
+					var mouz_loc = get_global_mouse_position()
+					var enemy_head = get_parent().get_node("EnemyHead")
+					var real_head_size = enemy_head.get_node("ColorRect").rect_size
+					var he_mid = enemy_head.position + real_head_size/2
+					# check if attacking the head and attack it
+					if he_mid.x - real_head_size.x/2 < mouz_loc.x && he_mid.x + real_head_size.x/2 > mouz_loc.x && he_mid.y - real_head_size.y/2 < mouz_loc.y && he_mid.y + real_head_size.y/2 > mouz_loc.y :
+							previous_position = rect_position
+							setup = true
+							state = in_attack
+							target_position = enemy_head.position
+							on_the_way = true
+					for ca in enemy_cards:
+						# if the mouse is in the enemy card attack it
+						var real_ca_size = ca.rect_size * ca.rect_scale
+						var ca_mid = ca.rect_position + real_ca_size/2
+						if ca_mid.x - real_ca_size.x/2 < mouz_loc.x && ca_mid.x + real_ca_size.x/2 > mouz_loc.x && ca_mid.y - real_ca_size.y/2 < mouz_loc.y && ca_mid.y + real_ca_size.y/2 > mouz_loc.y :
+							previous_position = rect_position
+							setup = true
+							state = in_attack
+							target_position = ca.rect_position
+							on_the_way = true
+							last_attacked = ca
+							break
 						
 func _draw():
 	if attacking:

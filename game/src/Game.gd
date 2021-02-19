@@ -11,7 +11,9 @@ var health = 40
 var enemy_health = 40
 var mana = 0
 var enemy_mana = 0
-var my_turn : bool
+var current_mana = 0
+var enemy_current_mana = 1
+var my_turn : bool = true
 
 # cards on places and the deck size
 var hand : Array
@@ -59,13 +61,6 @@ enum {
 	in_attack
 }
 
-func _input(event):
-	if Input.is_action_just_released("leftclick"):
-		draw_a_card("Big_Arei_Yanagi_21_12_11.png")
-	if Input.is_action_just_released("rightclick"):
-		play_enemy_card("Big_Arei_Yanagi_21_12_11.png")
-		enemy_attack("Big_Arei_Yanagi_21_12_11.png", "Big_Arei_Yanagi_21_12_11.png")
-
 func draw_a_card(cardname : String):
 		card_angle = PI/2 + between_cards*(len(hand)/2 - len(hand))
 		var new_card = card.instance()
@@ -86,14 +81,14 @@ func draw_a_card(cardname : String):
 		hand.append(new_card)
 		new_card.card_no = len(hand) # set the card no to the size of hand
 		# reorganise the hand according to the card
-		_reorganise_hand()
+		reorganise_hand()
 		# render card
 		add_child(new_card)
 		deck_size -= 1
 		# update the deck size
 		$Deck/ColorRect/CenterContainer/CardCount.text = str(deck_size)
 		
-func _reorganise_hand():
+func reorganise_hand():
 	card_no = 0
 	for ca in hand: # reorganize
 		card_angle = PI/2 + between_cards*(len(hand)/2 - card_no)
@@ -119,11 +114,19 @@ func enemy_draw_a_card():
 # one up for mana and enemy mana
 func add_mana():
 	mana += 1
-	$Mana/ManaCount.text = str(mana)
+	current_mana = mana
+	update_mana_text(str(current_mana))
 
 func add_enemy_mana():
 	enemy_mana += 1
-	$EnemyMana/EnemyManaCount.text = str(enemy_mana)
+	enemy_current_mana = enemy_mana
+	update_enemy_mana_text(str(enemy_current_mana))
+	
+func update_mana_text(mana_text : String):
+	$Mana/ManaCount.text = mana_text
+
+func update_enemy_mana_text(mana_text : String):
+	$EnemyMana/EnemyManaCount.text = mana_text
 	
 func update_turn_info(mt : bool):
 	my_turn = mt
@@ -131,10 +134,12 @@ func update_turn_info(mt : bool):
 	if my_turn:
 		$Turn/SkipButton.text = "End Turn"
 		$Turn/SkipButton.disabled = false
+		add_mana()
 	else:
 		# disable clicking disable change text to enemy turn
 		$Turn/SkipButton.text = "Enemy Turn"
 		$Turn/SkipButton.disabled = true
+		add_enemy_mana()
 		
 func take_damage(damage : int):
 	health -= damage
@@ -145,7 +150,8 @@ func hit_enemy(damage : int):
 	$EnemyHealth.text = str(health)
 
 func _on_SkipButton_button_down() -> void:
-	update_turn_info(false)
+	get_parent().get_node("Client").send_message(get_parent().get_node("Client").END_TURN_MESSAGE)
+	print(get_parent().get_node("Client").END_TURN_MESSAGE)
 
 # play an enemy card
 func play_enemy_card(card_name : String):
@@ -165,10 +171,14 @@ func play_enemy_card(card_name : String):
 				slot.is_empty = false
 				new_card.slot = slot
 				new_card.moving_to_table = true
+				enemy_current_mana -= new_card.cost
+				update_enemy_mana_text(str(enemy_current_mana))
 				break
 		new_card.setup = true
 		enemy_table.append(new_card)
 		new_card.state = on_table
+		
+		enemy_current_mana -= new_card.cost
 	
 		add_child(new_card)
 

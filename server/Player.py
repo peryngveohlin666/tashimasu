@@ -4,8 +4,10 @@ import random
 class Player:
 
     def __init__(self):
+        self.mana = 0
+        self.current_mana = 0
         self.deck = []
-        self.enemy = ("", )  # our enemy players name and websocket
+        self.enemy = None  # our enemy player object
         self.hand = []  # cards in our hand
         self.board = []
         self.identifier = ("" , )  # a tuple of our name and websocket
@@ -17,7 +19,7 @@ class Player:
 
     # draw a card for the player, return the card
     def draw_a_card(self):
-        draw = self.deck.pop(len(self.deck))
+        draw = self.deck.pop(len(self.deck) -1)
         self.hand.append(draw) # pop the last card from the deck and add it to the hand
         return draw
 

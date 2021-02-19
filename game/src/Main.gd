@@ -14,7 +14,7 @@ func _ready():
 	error_popup = get_node("ErrorPopup")
 	matchmaking_popup = get_node("MatchmakingPopup")
 	matchmaking_popup.popup_exclusive = true # stops the popup from disappearing when clicked outside of it
-	add_child(game_screen)
+	add_child(login_screen)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

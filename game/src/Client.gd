@@ -29,6 +29,12 @@ const YOUR_TURN_MESSAGE: String = "YOURTURN"
 
 const DRAW_A_CARD_MESSAGE: String = "DRAW"
 
+const PLAY_A_CARD_MESSAGE: String = "PLAY"
+
+const ENEMY_PLAY_MESSAGE: String = "ENEMYPLAY"
+
+const END_TURN_MESSAGE: String = "ENDTURN"
+
 var client: WebSocketClient
 var cert : X509Certificate
 
@@ -76,11 +82,14 @@ func _on_received_data() -> void:
 		get_parent().switch_to_game()
 		get_parent().hide_matchmaking_popup()
 	if(_get_protocol_message(parsed_data) == YOUR_TURN_MESSAGE):
-		get_parent().my_turn = true
+		get_parent().get_node("./Game").update_turn_info(true)
 	if(_get_protocol_message(parsed_data) == ENEMY_TURN_MESSAGE):
-		get_parent().get_node("./Game").my_turn = false
+		get_parent().get_node("./Game").update_turn_info(false)
 	if(_get_protocol_message(parsed_data) == DRAW_A_CARD_MESSAGE):
 		get_parent().get_node("./Game").draw_a_card(_get_data(parsed_data)[0])
+	if(_get_protocol_message(parsed_data) == ENEMY_PLAY_MESSAGE):
+		print(_get_data(parsed_data)[0])
+		get_parent().get_node("./Game").play_enemy_card(_get_data(parsed_data)[0])
 
 	
 # a function to send message to the server
