@@ -45,6 +45,8 @@ var on_the_way = false
 var previous_position = Vector2()
 # last attacked card
 var last_attacked
+# to check if the card attacked this round
+var attacked = false
 
 # card state
 enum {
@@ -306,6 +308,7 @@ func _input(event: InputEvent) -> void:
 								get_parent().current_mana -= cost
 								get_parent().update_mana_text(str(get_parent().current_mana))
 								get_parent().reorganise_hand()
+								get_parent().get_parent().get_node("Client").play_a_card(file_name)
 								break
 						
 			# return the card back on right click
@@ -317,36 +320,40 @@ func _input(event: InputEvent) -> void:
 					get_parent().reorganise_hand()
 		on_table:
 			if get_parent().my_turn:
-				# draw the attacking line
-				if event.is_action_pressed("leftclick") && attacking == false && enemy_card == false && mouse_is_inside:
-					attacking = true
-				# stop drawing the attacking line and if the mouse is inside a card or the enemy head attack the card or the head
-				if event.is_action_released("leftclick") && attacking == true && enemy_card == false:
-					attacking = false
-					var enemy_cards = get_parent().enemy_table
-					var mouz_loc = get_global_mouse_position()
-					var enemy_head = get_parent().get_node("EnemyHead")
-					var real_head_size = enemy_head.get_node("ColorRect").rect_size
-					var he_mid = enemy_head.position + real_head_size/2
-					# check if attacking the head and attack it
-					if he_mid.x - real_head_size.x/2 < mouz_loc.x && he_mid.x + real_head_size.x/2 > mouz_loc.x && he_mid.y - real_head_size.y/2 < mouz_loc.y && he_mid.y + real_head_size.y/2 > mouz_loc.y :
-							previous_position = rect_position
-							setup = true
-							state = in_attack
-							target_position = enemy_head.position
-							on_the_way = true
-					for ca in enemy_cards:
-						# if the mouse is in the enemy card attack it
-						var real_ca_size = ca.rect_size * ca.rect_scale
-						var ca_mid = ca.rect_position + real_ca_size/2
-						if ca_mid.x - real_ca_size.x/2 < mouz_loc.x && ca_mid.x + real_ca_size.x/2 > mouz_loc.x && ca_mid.y - real_ca_size.y/2 < mouz_loc.y && ca_mid.y + real_ca_size.y/2 > mouz_loc.y :
-							previous_position = rect_position
-							setup = true
-							state = in_attack
-							target_position = ca.rect_position
-							on_the_way = true
-							last_attacked = ca
-							break
+				if not attacked:
+					# draw the attacking line
+					if event.is_action_pressed("leftclick") && attacking == false && enemy_card == false && mouse_is_inside:
+						attacking = true
+					# stop drawing the attacking line and if the mouse is inside a card or the enemy head attack the card or the head
+					if event.is_action_released("leftclick") && attacking == true:
+						attacking = false
+						var enemy_cards = get_parent().enemy_table
+						var mouz_loc = get_global_mouse_position()
+						var enemy_head = get_parent().get_node("EnemyHead")
+						var real_head_size = enemy_head.get_node("ColorRect").rect_size
+						var he_mid = enemy_head.position + real_head_size/2
+						# check if attacking the head and attack it
+						if he_mid.x - real_head_size.x/2 < mouz_loc.x && he_mid.x + real_head_size.x/2 > mouz_loc.x && he_mid.y - real_head_size.y/2 < mouz_loc.y && he_mid.y + real_head_size.y/2 > mouz_loc.y :
+								previous_position = rect_position
+								setup = true
+								state = in_attack
+								target_position = enemy_head.position
+								on_the_way = true
+								attacked = true
+						for ca in enemy_cards:
+							# if the mouse is in the enemy card attack it
+							var real_ca_size = ca.rect_size * ca.rect_scale
+							var ca_mid = ca.rect_position + real_ca_size/2
+							if ca_mid.x - real_ca_size.x/2 < mouz_loc.x && ca_mid.x + real_ca_size.x/2 > mouz_loc.x && ca_mid.y - real_ca_size.y/2 < mouz_loc.y && ca_mid.y + real_ca_size.y/2 > mouz_loc.y :
+								previous_position = rect_position
+								setup = true
+								state = in_attack
+								target_position = ca.rect_position
+								on_the_way = true
+								last_attacked = ca
+								attacked = true
+								get_parent().get_parent().get_node("Client").attack_to_a_card(file_name, ca.file_name)
+								break
 						
 func _draw():
 	if attacking:

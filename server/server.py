@@ -57,6 +57,10 @@ ENEMY_PLAY_MESSAGE = "ENEMYPLAY"  # when the enemy plays a card send this messag
 
 END_TURN_MESSAGE = "ENDTURN"
 
+ATTACK_MESSAGE = "ATTACK"
+
+GET_ATTACKED_MESSAGE = "GETATTACKED"
+
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 ssl_context.load_cert_chain('cert/tashimasu.crt', 'cert/tashimasu.key')
 
@@ -162,9 +166,9 @@ async def matchmake():
         for i in range(6):
             card = p1.draw_a_card()
             await p1_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
-            if i <= 5:
-                card2 = p2.draw_a_card()
-                await p2_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card2)
+            card2 = p2.draw_a_card()
+            await p2_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card2)
+            await asyncio.sleep(0.5)
 
         print(p2_username + p1_username)
     await asyncio.sleep(1) # matchmake every second
@@ -238,8 +242,15 @@ async def respond(websocket, path):
                 (enemy_username, enemy_socket) = player.enemy.identifier
                 await enemy_socket.send(YOUR_TURN_MESSAGE)
                 await websocket.send(ENEMY_TURN_MESSAGE)
+                card = player.enemy.draw_a_card()
+                await enemy_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
                 player.mana += 1
                 player.current_mana = player.mana
+            elif protocol_message == ATTACK_MESSAGE:
+                (enemy_username, enemy_socket) = player.enemy.identifier
+                attacking_card_name = get_data(message)[0]
+                defending_card_name = get_data(message)[1]
+                await enemy_socket.send(GET_ATTACKED_MESSAGE + SEPERATOR + attacking_card_name + DATA_SEPERATOR + defending_card_name)
             else:
                 # get the proper function for the incoming protocol code and pass the message through to the necessary function
                 response = protocol_to_function[get_protocol_message(message)](message)

@@ -35,6 +35,10 @@ const ENEMY_PLAY_MESSAGE: String = "ENEMYPLAY"
 
 const END_TURN_MESSAGE: String = "ENDTURN"
 
+const ATTACK_MESSAGE: String = "ATTACK"
+
+const GET_ATTACKED_MESSAGE: String = "GETATTACKED"
+
 var client: WebSocketClient
 var cert : X509Certificate
 
@@ -90,12 +94,22 @@ func _on_received_data() -> void:
 	if(_get_protocol_message(parsed_data) == ENEMY_PLAY_MESSAGE):
 		print(_get_data(parsed_data)[0])
 		get_parent().get_node("./Game").play_enemy_card(_get_data(parsed_data)[0])
+	if(_get_protocol_message(parsed_data) == GET_ATTACKED_MESSAGE):
+		get_parent().get_node("./Game").enemy_attack(_get_data(parsed_data)[0], _get_data(parsed_data)[1])
+		print(_get_data(parsed_data)[1])
+		print(_get_data(parsed_data)[0])
 
 	
 # a function to send message to the server
 func send_message(message: String) -> void:
 	var packet: PoolByteArray = message.to_utf8()
 	client.get_peer(1).put_packet(packet)
+	
+func play_a_card(card_name: String) -> void:
+	send_message(PLAY_A_CARD_MESSAGE + SEPERATOR + card_name)
+	
+func attack_to_a_card(attacking_card: String, attacked_card: String):
+	send_message(ATTACK_MESSAGE + SEPERATOR + attacking_card + DATA_SEPERATOR + attacked_card)
 	
 # a function to log in
 func login(username: String, password: String):

@@ -140,6 +140,10 @@ func update_turn_info(mt : bool):
 		$Turn/SkipButton.text = "Enemy Turn"
 		$Turn/SkipButton.disabled = true
 		add_enemy_mana()
+	for ca in table:
+		ca.attacked = false
+	for e_ca in enemy_table:
+		e_ca.attacked = false	
 		
 func take_damage(damage : int):
 	health -= damage
@@ -189,11 +193,14 @@ func enemy_attack(enemy_card_name : String, player_card_name : String):
 	for pc in table:
 		if pc.file_name == player_card_name:
 			player_card = pc
+			print(pc.file_name)
 			break
 	# do the same for the enemy card
 	for ec in enemy_table:
-		if ec.file_name == player_card_name:
+		if ec.file_name == enemy_card_name:
 			enemy_card = ec
+			print("enemy")
+			print(ec.file_name)
 			break
 	if player_card && enemy_card:
 		enemy_card.last_attacked = player_card
