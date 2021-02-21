@@ -340,6 +340,8 @@ func _input(event: InputEvent) -> void:
 								target_position = enemy_head.position
 								on_the_way = true
 								attacked = true
+								get_parent().get_parent().get_node("Client").attack_enemy_head(file_name)
+								get_parent().hit_enemy(attack)
 						for ca in enemy_cards:
 							# if the mouse is in the enemy card attack it
 							var real_ca_size = ca.rect_size * ca.rect_scale

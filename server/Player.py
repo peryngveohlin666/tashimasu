@@ -4,13 +4,15 @@ import random
 class Player:
 
     def __init__(self):
+        self.turn = False
+        self.health = 40
         self.mana = 0
         self.current_mana = 0
         self.deck = []
         self.enemy = None  # our enemy player object
         self.hand = []  # cards in our hand
         self.board = []
-        self.attacked = [False, False, False, False, False]
+        self.attacked = [False, False, False, False, False, False, False, False, False]
         self.identifier = ("" , )  # a tuple of our name and websocket
 
     # assign the deck to the player
@@ -26,7 +28,7 @@ class Player:
 
     # play a card for the player
     def play_a_card(self, card):
-        if card in self.hand:
+        if card in self.hand and self.turn:
             cost = self.get_cost_value(card)
             if cost <= self.current_mana:
                 self.hand.remove(card)
@@ -40,13 +42,17 @@ class Player:
         self.identifier = identifier
 
     def attack(self, attacking_card, defending_card):
-        if attacking_card in self.board and defending_card in self.enemy.board:
+        if attacking_card in self.board and defending_card in self.enemy.board and self.turn:
             attacking_card_defense = self.get_defense_value(attacking_card)
             defending_card_defense = self.get_defense_value(defending_card)
             if attacking_card_defense >= defending_card_defense:
                 self.enemy.kill_a_card(defending_card)
             if attacking_card_defense <= defending_card_defense:
                 self.kill_a_card(attacking_card)
+
+    def attack_head(self, attacking_card):
+        if attacking_card in self.board and self.turn:
+            self.enemy.health -= self.get_attack_value(attacking_card)
 
     def get_defense_value(self, card_name):
         return int(card_name.split(".")[0].split("_")[3])
@@ -60,5 +66,13 @@ class Player:
     def kill_a_card(self, card_name):
         if card_name in self.board:
             self.board.remove(card_name)
+
+    def set_card_attacked(self, card_name):
+        card_index = self.board.index(card_name)
+        self.attacked[card_index] = True
+
+    def set_all_cards_non_attacked(self):
+        for b in self.attacked:
+            b = False
 
 

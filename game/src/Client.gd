@@ -39,6 +39,12 @@ const ATTACK_MESSAGE: String = "ATTACK"
 
 const GET_ATTACKED_MESSAGE: String = "GETATTACKED"
 
+const ATTACK_HEAD_MESSAGE: String = "ATTACKHEAD"
+
+const GET_ATTACKED_ON_THE_HEAD_MESSAGE: String = "ATTACKEDHEAD"
+
+
+
 var client: WebSocketClient
 var cert : X509Certificate
 
@@ -98,6 +104,8 @@ func _on_received_data() -> void:
 		get_parent().get_node("./Game").enemy_attack(_get_data(parsed_data)[0], _get_data(parsed_data)[1])
 		print(_get_data(parsed_data)[1])
 		print(_get_data(parsed_data)[0])
+	if(_get_protocol_message(parsed_data) == GET_ATTACKED_ON_THE_HEAD_MESSAGE):
+		get_parent().get_node("./Game").enemy_attack_head(_get_data(parsed_data)[0])
 
 	
 # a function to send message to the server
@@ -120,6 +128,9 @@ func login(username: String, password: String):
 func register(username: String, password: String):
 	send_message(REGISTER_MESSAGE + SEPERATOR + str(len(username)) + 
 	DATA_SEPERATOR + str(len(password)) + DATA_SEPERATOR + username + DATA_SEPERATOR + password)
+	
+func attack_enemy_head(card_name : String):
+	send_message(ATTACK_HEAD_MESSAGE + SEPERATOR + card_name)
 	
 # a function to get the protocol level message	
 func _get_protocol_message(message: String) -> String:

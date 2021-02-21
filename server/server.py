@@ -3,7 +3,6 @@ import os
 import random
 import string
 import bcrypt
-import concurrent.futures
 import Player
 
 import pymongo
@@ -60,6 +59,10 @@ END_TURN_MESSAGE = "ENDTURN"
 ATTACK_MESSAGE = "ATTACK"
 
 GET_ATTACKED_MESSAGE = "GETATTACKED"
+
+ATTACK_HEAD_MESSAGE = "ATTACKHEAD"
+
+GET_ATTACKED_ON_THE_HEAD_MESSAGE = "ATTACKEDHEAD"
 
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 ssl_context.load_cert_chain('cert/tashimasu.crt', 'cert/tashimasu.key')
@@ -158,6 +161,10 @@ async def matchmake():
         await p2_socket.send(GAME_FOUND_MESSAGE)
         await p1_socket.send(YOUR_TURN_MESSAGE)
         await p2_socket.send(ENEMY_TURN_MESSAGE)
+        p1.turn = True
+        p2.turn = False
+        p1.mana += 1
+        p1.current_mana = p1.mana
 
         # sleep for half a second to make sure that the players load the scene so that there won't be a load of commands going through slowing their computer down
         await asyncio.sleep(0.5)
@@ -168,7 +175,6 @@ async def matchmake():
             await p1_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
             card2 = p2.draw_a_card()
             await p2_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card2)
-            await asyncio.sleep(0.5)
 
         print(p2_username + p1_username)
     await asyncio.sleep(1) # matchmake every second
@@ -194,6 +200,14 @@ def get_deck(username):
     result = collection.find_one({"username": username})
     return result["deck"].split(DATA_SEPERATOR)
 
+def get_defense_value(card_name):
+    return int(card_name.split(".")[0].split("_")[3])
+
+def get_cost_value(card_name):
+    return int(card_name.split(".")[0].split("_")[5])
+
+def get_attack_value(card_name):
+    return int(card_name.split(".")[0].split("_")[4])
 
 
 
@@ -235,22 +249,32 @@ async def respond(websocket, path):
                     response = ERROR_MESSAGE
             elif protocol_message == PLAY_A_CARD_MESSAGE:
                 card_name = get_data(message)[0]
-                player.play_a_card(card_name)
-                (enemy_username, enemy_socket) = player.enemy.identifier
-                await enemy_socket.send(ENEMY_PLAY_MESSAGE + SEPERATOR + card_name)
+                if player.turn and get_cost_value(card_name) <= player.current_mana:
+                    player.play_a_card(card_name)
+                    (enemy_username, enemy_socket) = player.enemy.identifier
+                    await enemy_socket.send(ENEMY_PLAY_MESSAGE + SEPERATOR + card_name)
             elif protocol_message == END_TURN_MESSAGE:
                 (enemy_username, enemy_socket) = player.enemy.identifier
                 await enemy_socket.send(YOUR_TURN_MESSAGE)
                 await websocket.send(ENEMY_TURN_MESSAGE)
-                card = player.enemy.draw_a_card()
-                await enemy_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
-                player.mana += 1
-                player.current_mana = player.mana
+                player.enemy.turn = True
+                player.turn = False
+                player.enemy.mana += 1
+                player.enemy.current_mana = player.enemy.mana
+                if len(player.enemy.hand) != 10:
+                    card = player.enemy.draw_a_card()
+                    await enemy_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
             elif protocol_message == ATTACK_MESSAGE:
-                (enemy_username, enemy_socket) = player.enemy.identifier
                 attacking_card_name = get_data(message)[0]
                 defending_card_name = get_data(message)[1]
-                await enemy_socket.send(GET_ATTACKED_MESSAGE + SEPERATOR + attacking_card_name + DATA_SEPERATOR + defending_card_name)
+                if attacking_card_name in player.board and defending_card_name in player.enemy.board:
+                    (enemy_username, enemy_socket) = player.enemy.identifier
+                    await enemy_socket.send(GET_ATTACKED_MESSAGE + SEPERATOR + attacking_card_name + DATA_SEPERATOR + defending_card_name)
+            elif protocol_message == ATTACK_HEAD_MESSAGE:
+                attacking_card_name = get_data(message)[0]
+                if attacking_card_name in player.board:
+                    (enemy_username, enemy_socket) = player.enemy.identifier
+                    await enemy_socket.send(GET_ATTACKED_ON_THE_HEAD_MESSAGE + SEPERATOR + attacking_card_name)
             else:
                 # get the proper function for the incoming protocol code and pass the message through to the necessary function
                 response = protocol_to_function[get_protocol_message(message)](message)

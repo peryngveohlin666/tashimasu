@@ -151,7 +151,7 @@ func take_damage(damage : int):
 	
 func hit_enemy(damage : int):
 	enemy_health -= damage
-	$EnemyHealth.text = str(health)
+	$EnemyDeck/EnemyHealth.text = str(enemy_health)
 
 func _on_SkipButton_button_down() -> void:
 	get_parent().get_node("Client").send_message(get_parent().get_node("Client").END_TURN_MESSAGE)
@@ -210,4 +210,19 @@ func enemy_attack(enemy_card_name : String, player_card_name : String):
 		enemy_card.state = in_attack
 		enemy_card.on_the_way = true
 		enemy_card.target_position = player_card.rect_position
-	
+		
+func enemy_attack_head(enemy_card_name : String):
+	var enemy_card
+	for ec in enemy_table:
+		if ec.file_name == enemy_card_name:
+			enemy_card = ec
+			print("enemy")
+			print(ec.file_name)
+			break
+	if enemy_card:
+		enemy_card.setup = true
+		enemy_card.previous_position = enemy_card.rect_position
+		enemy_card.state = in_attack
+		enemy_card.on_the_way = true
+		enemy_card.target_position = Vector2 (1688, 744)
+		take_damage(enemy_card.attack)
