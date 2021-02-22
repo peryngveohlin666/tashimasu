@@ -64,6 +64,18 @@ ATTACK_HEAD_MESSAGE = "ATTACKHEAD"
 
 GET_ATTACKED_ON_THE_HEAD_MESSAGE = "ATTACKEDHEAD"
 
+UPDATE_DECK_MESSAGE = "UPDATEDECK"
+
+# request the cards that you own stored in the database
+REQUEST_CARDS_MESSAGE = "REQUESTCARDS"
+
+# send the cards that the player owns
+CARDS_MESSAGE = "CARDS"
+
+REQUEST_DECK_MESSAGE = "SENDDECK"
+
+RESPOND_DECK_MESSAGE = "TAKEDECK"
+
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 ssl_context.load_cert_chain('cert/tashimasu.crt', 'cert/tashimasu.key')
 
@@ -189,16 +201,28 @@ def generate_random_string():
 def get_protocol_message(message):
     return message.split(SEPERATOR)[0]
 
-
 # get the data from separated values from the message
 def get_data(message):
     return message.split(SEPERATOR)[1].split(DATA_SEPERATOR)
 
+# get data but as a string
+def get_data_string(message):
+    return message.split(SEPERATOR)[1]
 
 # get the deck of a user
 def get_deck(username):
     result = collection.find_one({"username": username})
     return result["deck"].split(DATA_SEPERATOR)
+
+# get the deck of a user but as string
+def get_deck_string(username):
+    result = collection.find_one({"username": username})
+    return result["deck"]
+
+# get the cards of a user
+def get_cards(username):
+    result = collection.find_one({"username": username})
+    return result["cards"]
 
 def get_defense_value(card_name):
     return int(card_name.split(".")[0].split("_")[3])
@@ -275,6 +299,13 @@ async def respond(websocket, path):
                 if attacking_card_name in player.board:
                     (enemy_username, enemy_socket) = player.enemy.identifier
                     await enemy_socket.send(GET_ATTACKED_ON_THE_HEAD_MESSAGE + SEPERATOR + attacking_card_name)
+            elif protocol_message == REQUEST_CARDS_MESSAGE:
+                await websocket.send(CARDS_MESSAGE + SEPERATOR + get_cards(username))
+            elif protocol_message == REQUEST_DECK_MESSAGE:
+                print("responded")
+                await websocket.send(RESPOND_DECK_MESSAGE + SEPERATOR + get_deck_string(username))
+            elif protocol_message == UPDATE_DECK_MESSAGE:
+                collection.update_one({"username": username}, {"$set": {"deck": get_data_string(message)}})
             else:
                 # get the proper function for the incoming protocol code and pass the message through to the necessary function
                 response = protocol_to_function[get_protocol_message(message)](message)

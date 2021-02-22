@@ -47,6 +47,12 @@ var previous_position = Vector2()
 var last_attacked
 # to check if the card attacked this round
 var attacked = false
+# to check if we are on the deck maker
+var on_deck_maker = false
+# original color
+var original_color : Color
+# selected color
+var selected_color = Color(1, 1, 1, 1)
 
 # card state
 enum {
@@ -63,7 +69,7 @@ var state = in_hand
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass
+	original_color = get_node("Back").color
 	
 # an init function to initialize values
 func init(fn: String):
@@ -278,84 +284,100 @@ func reset_card(card_num):
 	neighbour_card.state = reorganise_hand
 	
 func _input(event: InputEvent) -> void:
-	match state:
-		focused_in_hand, under_mouse:
-			# pick up the card
-			if event.is_action_pressed("leftclick"):
-				if card_selected:
-					state = under_mouse
-					setup = true
-					old_state = state
-					card_selected = false
-			# play a card
-			if event.is_action_released("leftclick") && get_parent().my_turn && get_parent().current_mana >= cost:
-				print(card_selected)
-				if card_selected == false:
-					var card_slots = get_parent().friendly_slots
-					var mouse_position = get_global_mouse_position()
-					# if the mouse is inside the card playing area
-					if mouse_position.x <= 1500 && mouse_position.x >= 110 && mouse_position.y <= 800 &&  mouse_position.y >= 200:
-						for cs in card_slots:
-							if cs.is_empty && cs.enemy_slot == false:
-								setup = true
-								moving_to_table = true
-								get_parent().table.append($".")
-								state = on_table
-								slot = cs
-								get_parent().hand.erase($".")
-								cs.is_empty = false
-								# update mana
-								get_parent().current_mana -= cost
-								get_parent().update_mana_text(str(get_parent().current_mana))
-								get_parent().reorganise_hand()
-								get_parent().get_parent().get_node("Client").play_a_card(file_name)
-								break
-						
-			# return the card back on right click
-			if event.is_action_pressed("rightclick"):
-					state = reorganise_hand
-					setup = true
-					target_position = default_position
-					card_selected = true
-					get_parent().reorganise_hand()
-		on_table:
-			if get_parent().my_turn:
-				if not attacked:
-					# draw the attacking line
-					if event.is_action_pressed("leftclick") && attacking == false && enemy_card == false && mouse_is_inside:
-						attacking = true
-					# stop drawing the attacking line and if the mouse is inside a card or the enemy head attack the card or the head
-					if event.is_action_released("leftclick") && attacking == true:
-						attacking = false
-						var enemy_cards = get_parent().enemy_table
-						var mouz_loc = get_global_mouse_position()
-						var enemy_head = get_parent().get_node("EnemyHead")
-						var real_head_size = enemy_head.get_node("ColorRect").rect_size
-						var he_mid = enemy_head.position + real_head_size/2
-						# check if attacking the head and attack it
-						if he_mid.x - real_head_size.x/2 < mouz_loc.x && he_mid.x + real_head_size.x/2 > mouz_loc.x && he_mid.y - real_head_size.y/2 < mouz_loc.y && he_mid.y + real_head_size.y/2 > mouz_loc.y :
-								previous_position = rect_position
-								setup = true
-								state = in_attack
-								target_position = enemy_head.position
-								on_the_way = true
-								attacked = true
-								get_parent().get_parent().get_node("Client").attack_enemy_head(file_name)
-								get_parent().hit_enemy(attack)
-						for ca in enemy_cards:
-							# if the mouse is in the enemy card attack it
-							var real_ca_size = ca.rect_size * ca.rect_scale
-							var ca_mid = ca.rect_position + real_ca_size/2
-							if ca_mid.x - real_ca_size.x/2 < mouz_loc.x && ca_mid.x + real_ca_size.x/2 > mouz_loc.x && ca_mid.y - real_ca_size.y/2 < mouz_loc.y && ca_mid.y + real_ca_size.y/2 > mouz_loc.y :
-								previous_position = rect_position
-								setup = true
-								state = in_attack
-								target_position = ca.rect_position
-								on_the_way = true
-								last_attacked = ca
-								attacked = true
-								get_parent().get_parent().get_node("Client").attack_to_a_card(file_name, ca.file_name)
-								break
+	if not on_deck_maker:
+		match state:
+			focused_in_hand, under_mouse:
+				# pick up the card
+				if event.is_action_pressed("leftclick"):
+					if card_selected:
+						state = under_mouse
+						setup = true
+						old_state = state
+						card_selected = false
+				# play a card
+				if event.is_action_released("leftclick") && get_parent().my_turn && get_parent().current_mana >= cost:
+					print(card_selected)
+					if card_selected == false:
+						var card_slots = get_parent().friendly_slots
+						var mouse_position = get_global_mouse_position()
+						# if the mouse is inside the card playing area
+						if mouse_position.x <= 1500 && mouse_position.x >= 110 && mouse_position.y <= 800 &&  mouse_position.y >= 200:
+							for cs in card_slots:
+								if cs.is_empty && cs.enemy_slot == false:
+									setup = true
+									moving_to_table = true
+									get_parent().table.append($".")
+									state = on_table
+									slot = cs
+									get_parent().hand.erase($".")
+									cs.is_empty = false
+									# update mana
+									get_parent().current_mana -= cost
+									get_parent().update_mana_text(str(get_parent().current_mana))
+									get_parent().reorganise_hand()
+									get_parent().get_parent().get_node("Client").play_a_card(file_name)
+									break
+							
+				# return the card back on right click
+				if event.is_action_pressed("rightclick"):
+						state = reorganise_hand
+						setup = true
+						target_position = default_position
+						card_selected = true
+						get_parent().reorganise_hand()
+			on_table:
+				if get_parent().my_turn:
+					if not attacked:
+						# draw the attacking line
+						if event.is_action_pressed("leftclick") && attacking == false && enemy_card == false && mouse_is_inside:
+							attacking = true
+						# stop drawing the attacking line and if the mouse is inside a card or the enemy head attack the card or the head
+						if event.is_action_released("leftclick") && attacking == true:
+							attacking = false
+							var enemy_cards = get_parent().enemy_table
+							var mouz_loc = get_global_mouse_position()
+							var enemy_head = get_parent().get_node("EnemyHead")
+							var real_head_size = enemy_head.get_node("ColorRect").rect_size
+							var he_mid = enemy_head.position + real_head_size/2
+							# check if attacking the head and attack it
+							if he_mid.x - real_head_size.x/2 < mouz_loc.x && he_mid.x + real_head_size.x/2 > mouz_loc.x && he_mid.y - real_head_size.y/2 < mouz_loc.y && he_mid.y + real_head_size.y/2 > mouz_loc.y :
+									previous_position = rect_position
+									setup = true
+									state = in_attack
+									target_position = enemy_head.position
+									on_the_way = true
+									attacked = true
+									get_parent().get_parent().get_node("Client").attack_enemy_head(file_name)
+									get_parent().hit_enemy(attack)
+							for ca in enemy_cards:
+								# if the mouse is in the enemy card attack it
+								var real_ca_size = ca.rect_size * ca.rect_scale
+								var ca_mid = ca.rect_position + real_ca_size/2
+								if ca_mid.x - real_ca_size.x/2 < mouz_loc.x && ca_mid.x + real_ca_size.x/2 > mouz_loc.x && ca_mid.y - real_ca_size.y/2 < mouz_loc.y && ca_mid.y + real_ca_size.y/2 > mouz_loc.y :
+									previous_position = rect_position
+									setup = true
+									state = in_attack
+									target_position = ca.rect_position
+									on_the_way = true
+									last_attacked = ca
+									attacked = true
+									get_parent().get_parent().get_node("Client").attack_to_a_card(file_name, ca.file_name)
+									break
+	else:
+		if event.is_action_pressed("leftclick") && mouse_is_inside:
+			set_selected()
+
+func set_selected():
+	if get_node("Back").color == original_color && len(get_parent().selected_cards) != 40 :
+		get_node("Back").color = selected_color
+		get_parent().selected_cards.append($".")
+		print(get_parent().selected_cards)
+		get_parent().update_card_count_label(len(get_parent().selected_cards))
+	else:
+		get_node("Back").color = original_color
+		get_parent().selected_cards.erase($".")
+		print(get_parent().selected_cards)
+		get_parent().update_card_count_label(len(get_parent().selected_cards))
 						
 func _draw():
 	if attacking:

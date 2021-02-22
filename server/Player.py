@@ -17,8 +17,9 @@ class Player:
 
     # assign the deck to the player
     def assign_deck(self, deck):
-        random.shuffle(deck)
-        self.deck = deck
+        if len(deck) == 40:
+            random.shuffle(deck)
+            self.deck = deck
 
     # draw a card for the player, return the card
     def draw_a_card(self):

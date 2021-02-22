@@ -43,6 +43,15 @@ const ATTACK_HEAD_MESSAGE: String = "ATTACKHEAD"
 
 const GET_ATTACKED_ON_THE_HEAD_MESSAGE: String = "ATTACKEDHEAD"
 
+const REQUEST_CARDS_MESSAGE: String = "REQUESTCARDS"
+
+const CARDS_MESSAGE: String = "CARDS"
+
+const REQUEST_DECK_MESSAGE: String = "SENDDECK"
+
+const RESPOND_DECK_MESSAGE: String = "TAKEDECK"
+
+const UPDATE_DECK_MESSAGE: String = "UPDATEDECK"
 
 
 var client: WebSocketClient
@@ -106,6 +115,10 @@ func _on_received_data() -> void:
 		print(_get_data(parsed_data)[0])
 	if(_get_protocol_message(parsed_data) == GET_ATTACKED_ON_THE_HEAD_MESSAGE):
 		get_parent().get_node("./Game").enemy_attack_head(_get_data(parsed_data)[0])
+	if(_get_protocol_message(parsed_data) == CARDS_MESSAGE):
+		get_parent().get_node("TitleScreen").switch_to_deckmaker(_get_data(parsed_data))
+	if(_get_protocol_message(parsed_data) == RESPOND_DECK_MESSAGE):
+		get_deck(parsed_data)
 
 	
 # a function to send message to the server
@@ -131,6 +144,20 @@ func register(username: String, password: String):
 	
 func attack_enemy_head(card_name : String):
 	send_message(ATTACK_HEAD_MESSAGE + SEPERATOR + card_name)
+	
+func request_cards():
+	send_message(REQUEST_CARDS_MESSAGE)
+	
+func request_deck():
+	send_message(REQUEST_DECK_MESSAGE)
+	print("requested")
+	
+func get_deck(message: String):
+	print("gotem")
+	get_parent().get_child(3).set_deck(_get_data(message))
+	
+func update_deck(cards: String):
+	send_message(UPDATE_DECK_MESSAGE + SEPERATOR + cards)
 	
 # a function to get the protocol level message	
 func _get_protocol_message(message: String) -> String:

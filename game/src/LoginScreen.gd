@@ -3,6 +3,8 @@ extends Control
 var username_field
 var password_field
 
+var cards
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	var login_button = get_node("VBoxContainer/LoginButton")

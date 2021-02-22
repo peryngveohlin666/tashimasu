@@ -19,8 +19,12 @@ func _on_exit_pressed():
 	get_tree().quit()	
 
 func _on_deckmaker_pressed():
+	get_parent().get_node("Client").request_cards()
+
+func switch_to_deckmaker(cards):
 	main_screen.remove_child(title_screen)
 	var deckmaker_screen = load("res://scenes/game/DeckMaker.tscn").instance()
+	deckmaker_screen.cards = cards
 	main_screen.add_child(deckmaker_screen)
 	
 func _on_matchmake_pressed():

@@ -24,6 +24,9 @@ func switch_to_menu_from_login_screen():
 	remove_child(login_screen)
 	add_child(title_screen)
 	
+func switch_to_menu():
+	add_child(title_screen)
+	
 func show_error_popup():
 	error_popup.popup_centered(Vector2( 150, 150 ) )
 	
