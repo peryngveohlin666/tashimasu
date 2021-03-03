@@ -17,6 +17,7 @@ class Player:
 
     # assign the deck to the player
     def assign_deck(self, deck):
+        print(len(deck))
         if len(deck) == 40:
             random.shuffle(deck)
             self.deck = deck
@@ -43,17 +44,25 @@ class Player:
         self.identifier = identifier
 
     def attack(self, attacking_card, defending_card):
-        if attacking_card in self.board and defending_card in self.enemy.board and self.turn:
+        if attacking_card in self.board and defending_card in self.enemy.board and self.turn and not self.check_card_attacked(attacking_card):
             attacking_card_defense = self.get_defense_value(attacking_card)
             defending_card_defense = self.get_defense_value(defending_card)
+            self.set_card_attacked(attacking_card)
             if attacking_card_defense >= defending_card_defense:
                 self.enemy.kill_a_card(defending_card)
             if attacking_card_defense <= defending_card_defense:
                 self.kill_a_card(attacking_card)
 
+    # attacks the enemy head returns an enemy died boolean variable to check if enemy died
     def attack_head(self, attacking_card):
-        if attacking_card in self.board and self.turn:
+        if attacking_card in self.board and self.turn and not self.check_card_attacked(attacking_card):
             self.enemy.health -= self.get_attack_value(attacking_card)
+            self.set_card_attacked(attacking_card)
+            if self.enemy.health <= 0:
+                return True
+            else:
+                return False
+        return False
 
     def get_defense_value(self, card_name):
         return int(card_name.split(".")[0].split("_")[3])
@@ -72,8 +81,9 @@ class Player:
         card_index = self.board.index(card_name)
         self.attacked[card_index] = True
 
+    def check_card_attacked(self, card_name):
+        card_index = self.board.index(card_name)
+        return self.attacked[card_index]
+
     def set_all_cards_non_attacked(self):
-        for b in self.attacked:
-            b = False
-
-
+        self.attacked = [False, False, False, False, False, False, False, False, False]

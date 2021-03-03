@@ -76,6 +76,10 @@ REQUEST_DECK_MESSAGE = "SENDDECK"
 
 RESPOND_DECK_MESSAGE = "TAKEDECK"
 
+LOST_GAME_MESSAGE = "LOST"
+
+WON_GAME_MESSAGE = "WON"
+
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 ssl_context.load_cert_chain('cert/tashimasu.crt', 'cert/tashimasu.key')
 
@@ -233,6 +237,22 @@ def get_cost_value(card_name):
 def get_attack_value(card_name):
     return int(card_name.split(".")[0].split("_")[4])
 
+# get a random card from the card database and add it to the cards list of a user and return the card
+def earn_a_card(username):
+    cards = os.listdir("cards")
+    earned_card = cards[random.randint(0, len(cards) - 1)]
+    player_cards = get_cards(username)
+
+    # the new value for the player's cards (add the old cards and the earned card together)
+    new_cards = player_cards + "," + earned_card
+
+    # add the card to the player's cards in the database if it is not already in his cards
+    if earned_card not in player_cards.split(DATA_SEPERATOR):
+        collection.update_one({"username": username}, {"$set": {"cards": new_cards}})
+
+    # return the earned card for the cool animations in the client
+    return earned_card
+
 
 
 # a dictionary to map protocol level messages to functions, some functions return multiple values so they are handled with if statements
@@ -278,6 +298,9 @@ async def respond(websocket, path):
                     (enemy_username, enemy_socket) = player.enemy.identifier
                     await enemy_socket.send(ENEMY_PLAY_MESSAGE + SEPERATOR + card_name)
             elif protocol_message == END_TURN_MESSAGE:
+                # set the cards non attacked
+                player.set_all_cards_non_attacked()
+                player.enemy.set_all_cards_non_attacked()
                 (enemy_username, enemy_socket) = player.enemy.identifier
                 await enemy_socket.send(YOUR_TURN_MESSAGE)
                 await websocket.send(ENEMY_TURN_MESSAGE)
@@ -289,16 +312,28 @@ async def respond(websocket, path):
                     card = player.enemy.draw_a_card()
                     await enemy_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
             elif protocol_message == ATTACK_MESSAGE:
+                print("attac succes")
                 attacking_card_name = get_data(message)[0]
                 defending_card_name = get_data(message)[1]
-                if attacking_card_name in player.board and defending_card_name in player.enemy.board:
+                if attacking_card_name in player.board and defending_card_name in player.enemy.board and not player.check_card_attacked(attacking_card_name):
                     (enemy_username, enemy_socket) = player.enemy.identifier
+                    player.attack(attacking_card_name, defending_card_name)
                     await enemy_socket.send(GET_ATTACKED_MESSAGE + SEPERATOR + attacking_card_name + DATA_SEPERATOR + defending_card_name)
             elif protocol_message == ATTACK_HEAD_MESSAGE:
                 attacking_card_name = get_data(message)[0]
-                if attacking_card_name in player.board:
+                if attacking_card_name in player.board and not player.check_card_attacked(attacking_card_name):
+                    print("attac succes")
                     (enemy_username, enemy_socket) = player.enemy.identifier
+                    enemy_died = player.attack_head(attacking_card_name)
                     await enemy_socket.send(GET_ATTACKED_ON_THE_HEAD_MESSAGE + SEPERATOR + attacking_card_name)
+                    if enemy_died:
+                        # send the enemy lost game message
+                        await enemy_socket.send(LOST_GAME_MESSAGE)
+                        # win a card for the winner player
+                        earned_card = earn_a_card(player.identifier[0])
+                        print("earn card")
+                        await websocket.send(WON_GAME_MESSAGE + SEPERATOR + earned_card)
+
             elif protocol_message == REQUEST_CARDS_MESSAGE:
                 await websocket.send(CARDS_MESSAGE + SEPERATOR + get_cards(username))
             elif protocol_message == REQUEST_DECK_MESSAGE:
