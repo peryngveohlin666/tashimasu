@@ -89,6 +89,9 @@ logged_in_users = []
 # a list of currently matchmaking users
 matchmaking_users = []
 
+# a bool value to check if the matchamking users are being accessed before accessing them
+matchmaking_users_accessed = False
+
 
 
 # get a message as a parameter and return an authentication key
@@ -162,39 +165,47 @@ def get_starter_cards():
 
 # a function to constantly pair players who are matchmaking
 async def matchmake():
-    print("matchmake")
-    print(matchmaking_users)
-    while len(matchmaking_users) >= 2:
-        p1 = matchmaking_users.pop(len(matchmaking_users) - 1)
-        p2 = matchmaking_users.pop(len(matchmaking_users) - 1)
-        for user in matchmaking_users:
-            print(user.username)
-        p1.set_enemy(p2)
-        p2.set_enemy(p1)
-        (p1_username, p1_socket) = p1.identifier
-        (p2_username, p2_socket) = p2.identifier
-        await p1_socket.send(GAME_FOUND_MESSAGE)
-        await p2_socket.send(GAME_FOUND_MESSAGE)
-        await p1_socket.send(YOUR_TURN_MESSAGE)
-        await p2_socket.send(ENEMY_TURN_MESSAGE)
-        p1.turn = True
-        p2.turn = False
-        p1.mana += 1
-        p1.current_mana = p1.mana
+    global matchmaking_users_accessed
+    finished = False
 
-        # sleep for half a second to make sure that the players load the scene so that there won't be a load of commands going through slowing their computer down
-        await asyncio.sleep(0.5)
+    while not finished:
+        if not matchmaking_users_accessed:
+            matchmaking_users_accessed = True
+            print("matchmake")
+            print(matchmaking_users)
+            while len(matchmaking_users) >= 2:
+                p1 = matchmaking_users.pop(len(matchmaking_users) - 1)
+                p2 = matchmaking_users.pop(len(matchmaking_users) - 1)
+                for user in matchmaking_users:
+                    print(user.username)
+                p1.set_enemy(p2)
+                p2.set_enemy(p1)
+                (p1_username, p1_socket) = p1.identifier
+                (p2_username, p2_socket) = p2.identifier
+                await p1_socket.send(GAME_FOUND_MESSAGE)
+                await p2_socket.send(GAME_FOUND_MESSAGE)
+                await p1_socket.send(YOUR_TURN_MESSAGE)
+                await p2_socket.send(ENEMY_TURN_MESSAGE)
+                p1.turn = True
+                p2.turn = False
+                p1.mana += 1
+                p1.current_mana = p1.mana
 
-        # draw cards for the players one
-        for i in range(6):
-            card = p1.draw_a_card()
-            await p1_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
-            card2 = p2.draw_a_card()
-            await p2_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card2)
+                # sleep for half a second to make sure that the players load the scene so that there won't be a load of commands going through slowing their computer down
+                await asyncio.sleep(0.5)
 
-        print(p2_username + p1_username)
-    await asyncio.sleep(1) # matchmake every second
-    asyncio.create_task(matchmake())
+                # draw cards for the players one
+                for i in range(6):
+                    card = p1.draw_a_card()
+                    await p1_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
+                    card2 = p2.draw_a_card()
+                    await p2_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card2)
+
+                print(p2_username + p1_username)
+            matchmaking_users_accessed = False
+            finished = True
+            await asyncio.sleep(1) # matchmake every second
+            asyncio.create_task(matchmake())
 
 
 def generate_random_string():
@@ -262,6 +273,8 @@ protocol_to_function = {
 
 
 async def respond(websocket, path):
+    global matchmaking_users_accessed
+
     username = ""
     auth_key = ""
 
@@ -285,12 +298,18 @@ async def respond(websocket, path):
                     auth_key += response.split(SEPERATOR)[1]
                     player.set_identifier((username, websocket)) # set the identifier of the player instance so that other enemies can communicate with us
             elif protocol_message == MATCHMAKE_MESSAGE:
-                if player not in matchmaking_users:
-                    player.assign_deck(get_deck(username))
-                    print(player.deck)
-                    matchmaking_users.append(player)
-                else:
-                    response = ERROR_MESSAGE
+                finished = False
+                while not finished:
+                    if not matchmaking_users_accessed:
+                        matchmaking_users_accessed = True
+                        if player not in matchmaking_users:
+                            player.assign_deck(get_deck(username))
+                            print(player.deck)
+                            matchmaking_users.append(player)
+                        else:
+                            response = ERROR_MESSAGE
+                        matchmaking_users_accessed = False
+                        finished = True
             elif protocol_message == PLAY_A_CARD_MESSAGE:
                 card_name = get_data(message)[0]
                 if player.turn and get_cost_value(card_name) <= player.current_mana:
@@ -352,10 +371,17 @@ async def respond(websocket, path):
             if response != "":
                 await websocket.send(response)
     finally:
-        logged_in_users.remove(username)
-        if username in matchmaking_users:
-            matchmaking_users.remove(username)
-        print(f"disconnected unresponsive socket {websocket}")
+        finished = False
+        while not finished:
+            if not matchmaking_users_accessed:
+                matchmaking_users_accessed = True
+                if username in logged_in_users:
+                    logged_in_users.remove(username)
+                if username in matchmaking_users:
+                    matchmaking_users.remove(username)
+                print(f"disconnected unresponsive socket {websocket}")
+                matchmaking_users_accessed = False
+                finished = True
 
 
 start_server = websockets.serve(respond, IP, PORT, ssl=ssl_context)

@@ -7,6 +7,7 @@ var game_screen = load("res://scenes/game/Game.tscn").instance()
 var client : Node # the client code instance that is attached to this node
 var error_popup : Node
 var matchmaking_popup : Node
+var win_popup : Node
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -40,3 +41,8 @@ func show_matchmaking_popup():
 func hide_matchmaking_popup():
 	matchmaking_popup.hide()
 	
+func won_game(earned_card):
+	win_popup = load("res://scenes/ui/popup/WinPopup.tscn").instance()
+	win_popup.init(earned_card)
+	add_child(win_popup)
+	win_popup.popup_centered(Vector2( 150, 150 ) )

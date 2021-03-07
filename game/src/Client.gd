@@ -53,6 +53,10 @@ const RESPOND_DECK_MESSAGE: String = "TAKEDECK"
 
 const UPDATE_DECK_MESSAGE: String = "UPDATEDECK"
 
+const WON_GAME_MESSAGE: String = "WON"
+
+const LOST_GAME_MESSAGE: String = "LOST"
+
 
 var client: WebSocketClient
 var cert : X509Certificate
@@ -84,6 +88,7 @@ func _process(delta):
 # do when first connected to the server
 func _on_connected(_protocol: String) -> void:
 	print("Connected")
+	get_parent().won_game("Big_Ai_Odaka_16_6_1.png")
 	
 # do when whenever data is received
 func _on_received_data() -> void:
@@ -119,6 +124,9 @@ func _on_received_data() -> void:
 		get_parent().get_node("TitleScreen").switch_to_deckmaker(_get_data(parsed_data))
 	if(_get_protocol_message(parsed_data) == RESPOND_DECK_MESSAGE):
 		get_deck(parsed_data)
+	if(_get_protocol_message(parsed_data) == WON_GAME_MESSAGE):
+		var data = _get_data(parsed_data)[0]
+	
 
 	
 # a function to send message to the server

@@ -61,6 +61,7 @@ enum {
 	in_attack
 }
 
+# a function to initialize a card and play the drawing card animations
 func draw_a_card(cardname : String):
 		card_angle = PI/2 + between_cards*(len(hand)/2 - len(hand))
 		var new_card = card.instance()
@@ -87,7 +88,8 @@ func draw_a_card(cardname : String):
 		deck_size -= 1
 		# update the deck size
 		$Deck/ColorRect/CenterContainer/CardCount.text = str(deck_size)
-		
+
+# a function to reorganize the hand and put the cards in order
 func reorganise_hand():
 	card_no = 0
 	for ca in hand: # reorganize
@@ -106,7 +108,8 @@ func reorganise_hand():
 		elif ca.state == move_to_hand:
 			# fix the jittering by teleporting the card secretly
 			ca.start_position = ca.target_position - (ca.target_position - ca.rect_position/(1-ca.time))
-			
+
+# a function that updates the enemy deck size every time they draw a card
 func enemy_draw_a_card():
 	enemy_deck_size -=1
 	$EnemyDeck/EnemyCardCount.text = str(enemy_deck_size)
@@ -186,6 +189,7 @@ func play_enemy_card(card_name : String):
 	
 		add_child(new_card)
 
+# a function to play enemy attack animations
 func enemy_attack(enemy_card_name : String, player_card_name : String):
 	var player_card # player card
 	var enemy_card # enemy card
@@ -210,7 +214,8 @@ func enemy_attack(enemy_card_name : String, player_card_name : String):
 		enemy_card.state = in_attack
 		enemy_card.on_the_way = true
 		enemy_card.target_position = player_card.rect_position
-		
+
+# animations when the enemy attack our head
 func enemy_attack_head(enemy_card_name : String):
 	var enemy_card
 	for ec in enemy_table:
