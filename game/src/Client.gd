@@ -88,7 +88,6 @@ func _process(delta):
 # do when first connected to the server
 func _on_connected(_protocol: String) -> void:
 	print("Connected")
-	get_parent().won_game("Big_Ai_Odaka_16_6_1.png")
 	
 # do when whenever data is received
 func _on_received_data() -> void:
@@ -126,7 +125,9 @@ func _on_received_data() -> void:
 		get_deck(parsed_data)
 	if(_get_protocol_message(parsed_data) == WON_GAME_MESSAGE):
 		var data = _get_data(parsed_data)[0]
-	
+		get_parent().won_game(data)
+	if(_get_protocol_message(parsed_data) == LOST_GAME_MESSAGE):
+		get_parent().lost_game()
 
 	
 # a function to send message to the server
@@ -162,7 +163,8 @@ func request_deck():
 	
 func get_deck(message: String):
 	print("gotem")
-	get_parent().get_child(3).set_deck(_get_data(message))
+	var n = len(get_parent().get_children())
+	get_parent().get_child(n - 1).set_deck(_get_data(message))
 	
 func update_deck(cards: String):
 	send_message(UPDATE_DECK_MESSAGE + SEPERATOR + cards)

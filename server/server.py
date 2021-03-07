@@ -350,7 +350,6 @@ async def respond(websocket, path):
                         await enemy_socket.send(LOST_GAME_MESSAGE)
                         # win a card for the winner player
                         earned_card = earn_a_card(player.identifier[0])
-                        print("earn card")
                         await websocket.send(WON_GAME_MESSAGE + SEPERATOR + earned_card)
 
             elif protocol_message == REQUEST_CARDS_MESSAGE:

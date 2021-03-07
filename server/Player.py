@@ -58,6 +58,7 @@ class Player:
         if attacking_card in self.board and self.turn and not self.check_card_attacked(attacking_card):
             self.enemy.health -= self.get_attack_value(attacking_card)
             self.set_card_attacked(attacking_card)
+            print("attacked enemy health is: " + str(self.enemy.health) + "my health is " + str(self.health))
             if self.enemy.health <= 0:
                 return True
             else:

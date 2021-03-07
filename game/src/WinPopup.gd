@@ -29,6 +29,7 @@ func init(card_name):
 	new_card.on_deck_maker = true
 	new_card.init(card_name)
 	new_card.state = on_table
+	new_card.card_earned = true
 	add_child(new_card)
 	
 

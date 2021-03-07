@@ -53,6 +53,8 @@ var on_deck_maker = false
 var original_color : Color
 # selected color
 var selected_color = Color(1, 1, 1, 1)
+# if the card is just earned (to not introduce a new state)
+var card_earned = false
 
 # card state
 enum {
@@ -364,7 +366,7 @@ func _input(event: InputEvent) -> void:
 									get_parent().get_parent().get_node("Client").attack_to_a_card(file_name, ca.file_name)
 									break
 	else:
-		if event.is_action_pressed("leftclick") && mouse_is_inside:
+		if event.is_action_pressed("leftclick") && mouse_is_inside && not card_earned:
 			set_selected()
 
 func set_selected():
