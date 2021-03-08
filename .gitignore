@@ -145,3 +145,4 @@ cython_debug/
 
 # the big file
 *.h5
+server/uri.txt
