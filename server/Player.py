@@ -36,6 +36,7 @@ class Player:
                 self.hand.remove(card)
                 self.board.append(card)
                 self.current_mana -= cost
+                self.set_card_non_attacked(card)
 
     def set_enemy(self, enemy):
         self.enemy = enemy
@@ -88,3 +89,8 @@ class Player:
 
     def set_all_cards_non_attacked(self):
         self.attacked = [False, False, False, False, False, False, False, False, False]
+
+# to avoid a bug with playing a card in the place of a dead card
+    def set_card_non_attacked(self, card_name):
+        card_index = self.board.index(card_name)
+        self.attacked[card_index] = False
