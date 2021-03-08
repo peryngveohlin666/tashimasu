@@ -30,33 +30,8 @@ model = load_model('generator_model.h5', compile=False)
 def generate_cards(n=1):
 
     def generate_attribute():
-        # luck of the attribute
-        luck = randint(1, 100)
 
-        # max of the attribute
-        max = randint(1, 20)
-
-        # min of the attribute
-        min = randint(1, 5)
-
-        if min > max:
-            max = min
-
-        if luck == 100:
-            # n of the attribute (the multiplier)
-            n = randint(4, 6)
-            min+=1
-            max+=1
-        elif luck < 100:
-            n = randint(2, 5)
-        elif luck < 60:
-            n = randint(1, 4)
-        elif luck < 30:
-            n = randint(1, 3)
-        else:
-            n = randint(1, 2)
-
-        attribute = n * randint(min, max)
+        attribute = randint(0, 20)
 
         return attribute
 
@@ -66,14 +41,19 @@ def generate_cards(n=1):
         # create an image using the noise as the input
         gen_imgs = model.predict(noise)
         for image in gen_imgs:
+            luck = randint(0, 100)
             img = array_to_img(image)
-            health = generate_attribute()
+            defense = generate_attribute()
             damage = generate_attribute()
             name = name_generator.generate_names(n=1)[0]
             type = types[randint(0, len(types) - 1)]
-            cost = int((health + damage) / randint(2, 3))
-            img.save("output/" + type + "_" + name + "_" + str(health)
+            cost = int((defense + damage) / 2)
+            if luck == 7:
+                cost -= 1
+            if cost <= 0:
+                cost = 0
+            img.save("output/" + type + "_" + name + "_" + str(defense)
                      + "_" + str(damage) + "_" + str(cost) + ".png")
 
 
-generate_cards(n=20)
+generate_cards(n=40)
