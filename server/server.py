@@ -298,6 +298,9 @@ async def respond(websocket, path):
                     auth_key += response.split(SEPERATOR)[1]
                     player.set_identifier((username, websocket)) # set the identifier of the player instance so that other enemies can communicate with us
             elif protocol_message == MATCHMAKE_MESSAGE:
+                # reset the player
+                player = Player.Player()
+                player.set_identifier((username, websocket))
                 finished = False
                 while not finished:
                     if not matchmaking_users_accessed:
@@ -376,8 +379,8 @@ async def respond(websocket, path):
                 matchmaking_users_accessed = True
                 if username in logged_in_users:
                     logged_in_users.remove(username)
-                if username in matchmaking_users:
-                    matchmaking_users.remove(username)
+                if player in matchmaking_users:
+                    matchmaking_users.remove(player)
                 print(f"disconnected unresponsive socket {websocket}")
                 matchmaking_users_accessed = False
                 finished = True

@@ -142,3 +142,6 @@ cython_debug/
 
 # ide stuff
 */.idea
+
+# the big file
+*.h5
