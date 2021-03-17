@@ -86,6 +86,9 @@ ssl_context.load_cert_chain('cert/tashimasu.crt', 'cert/tashimasu.key')
 # keep track of the logged in users.
 logged_in_users = []
 
+# a bool value to check if logged in users is accessed
+logged_in_users_accessed = False
+
 # a list of currently matchmaking users
 matchmaking_users = []
 
@@ -117,9 +120,18 @@ def login(message):
         password_hash = bcrypt.hashpw((PEPPER + password).encode("utf-8"), password_salt)
 
         if password_hash == result["password_hash"]:
-            if username in logged_in_users:
-                return ERROR_MESSAGE, ""
-            logged_in_users.append(username)
+            global logged_in_users_accessed
+            global logged_in_users
+            # check if the user is logged in
+            finished = False
+            while not finished:
+                if not logged_in_users_accessed:
+                    logged_in_users_accessed = True
+                    if username in logged_in_users:
+                        return ERROR_MESSAGE, ""
+                    logged_in_users.append(username)
+                    logged_in_users_accessed = False
+                    finished = True
             return (SUCCESS_LOGIN_RESPONSE + SEPERATOR + generate_random_string(), username)
 
     return ERROR_MESSAGE, ""
@@ -165,47 +177,50 @@ def get_starter_cards():
 
 # a function to constantly pair players who are matchmaking
 async def matchmake():
-    global matchmaking_users_accessed
-    finished = False
+    try:
+        global matchmaking_users_accessed
+        finished = False
 
-    while not finished:
-        if not matchmaking_users_accessed:
-            matchmaking_users_accessed = True
-            print("matchmake")
-            print(matchmaking_users)
-            while len(matchmaking_users) >= 2:
-                p1 = matchmaking_users.pop(len(matchmaking_users) - 1)
-                p2 = matchmaking_users.pop(len(matchmaking_users) - 1)
-                for user in matchmaking_users:
-                    print(user.username)
-                p1.set_enemy(p2)
-                p2.set_enemy(p1)
-                (p1_username, p1_socket) = p1.identifier
-                (p2_username, p2_socket) = p2.identifier
-                await p1_socket.send(GAME_FOUND_MESSAGE)
-                await p2_socket.send(GAME_FOUND_MESSAGE)
-                await p1_socket.send(YOUR_TURN_MESSAGE)
-                await p2_socket.send(ENEMY_TURN_MESSAGE)
-                p1.turn = True
-                p2.turn = False
-                p1.mana += 1
-                p1.current_mana = p1.mana
+        while not finished:
+            if not matchmaking_users_accessed:
+                matchmaking_users_accessed = True
+                print("matchmake")
+                print(matchmaking_users)
+                while len(matchmaking_users) >= 2:
+                    p1 = matchmaking_users.pop(len(matchmaking_users) - 1)
+                    p2 = matchmaking_users.pop(len(matchmaking_users) - 1)
+                    for user in matchmaking_users:
+                        print(user.username)
+                    p1.set_enemy(p2)
+                    p2.set_enemy(p1)
+                    (p1_username, p1_socket) = p1.identifier
+                    (p2_username, p2_socket) = p2.identifier
+                    await p1_socket.send(GAME_FOUND_MESSAGE)
+                    await p2_socket.send(GAME_FOUND_MESSAGE)
+                    await p1_socket.send(YOUR_TURN_MESSAGE)
+                    await p2_socket.send(ENEMY_TURN_MESSAGE)
+                    p1.turn = True
+                    p2.turn = False
+                    p1.mana += 1
+                    p1.current_mana = p1.mana
 
-                # sleep for half a second to make sure that the players load the scene so that there won't be a load of commands going through slowing their computer down
-                await asyncio.sleep(0.5)
+                    # sleep for half a second to make sure that the players load the scene so that there won't be a load of commands going through slowing their computer down
+                    await asyncio.sleep(0.5)
 
-                # draw cards for the players one
-                for i in range(6):
-                    card = p1.draw_a_card()
-                    await p1_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
-                    card2 = p2.draw_a_card()
-                    await p2_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card2)
+                    # draw cards for the players one
+                    for i in range(6):
+                        card = p1.draw_a_card()
+                        await p1_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
+                        card2 = p2.draw_a_card()
+                        await p2_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card2)
 
-                print(p2_username + p1_username)
-            matchmaking_users_accessed = False
-            finished = True
-            await asyncio.sleep(1) # matchmake every second
-            asyncio.create_task(matchmake())
+                    print(p2_username + p1_username)
+                matchmaking_users_accessed = False
+                finished = True
+                await asyncio.sleep(1) # matchmake every second
+    finally:
+        asyncio.create_task(matchmake())
+
 
 
 def generate_random_string():
@@ -274,6 +289,9 @@ protocol_to_function = {
 
 async def respond(websocket, path):
     global matchmaking_users_accessed
+    global logged_in_users_accessed
+    global logged_in_users
+    global matchmaking_users
 
     username = ""
     auth_key = ""
@@ -375,7 +393,8 @@ async def respond(websocket, path):
     finally:
         finished = False
         while not finished:
-            if not matchmaking_users_accessed:
+            if not matchmaking_users_accessed and not logged_in_users_accessed:
+                logged_in_users_accessed = True
                 matchmaking_users_accessed = True
                 if username in logged_in_users:
                     logged_in_users.remove(username)
@@ -383,6 +402,7 @@ async def respond(websocket, path):
                     matchmaking_users.remove(player)
                 print(f"disconnected unresponsive socket {websocket}")
                 matchmaking_users_accessed = False
+                logged_in_users_accessed = False
                 finished = True
 
 
