@@ -267,6 +267,7 @@ func _on_Focus_mouse_exited() -> void:
 			target_position = default_position
 			target_rotation = default_rotation
 			state = reorganise_hand
+			get_parent().reorganise_hand()
 			
 # move the neighbor card (check if on the left and multiply by spread factor)
 func move_neighbor_card(card_num, left, spread_factor):
