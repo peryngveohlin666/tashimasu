@@ -231,3 +231,9 @@ func enemy_attack_head(enemy_card_name : String):
 		enemy_card.on_the_way = true
 		enemy_card.target_position = Vector2 (1688, 744)
 		take_damage(enemy_card.attack)
+		
+# update the hand render order to fix a visual bug
+func update_hand_render_order():
+	for ca in hand:
+		remove_child(ca)
+		add_child(ca)

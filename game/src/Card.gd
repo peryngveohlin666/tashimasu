@@ -319,6 +319,7 @@ func _input(event: InputEvent) -> void:
 									get_parent().update_mana_text(str(get_parent().current_mana))
 									get_parent().reorganise_hand()
 									get_parent().get_parent().get_node("Client").play_a_card(file_name)
+									get_parent().update_hand_render_order()
 									break
 							
 				# return the card back on right click
