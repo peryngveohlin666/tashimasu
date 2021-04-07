@@ -128,6 +128,8 @@ def login(message):
                 if not logged_in_users_accessed:
                     logged_in_users_accessed = True
                     if username in logged_in_users:
+                        finished = True
+                        logged_in_users_accessed = False
                         return ERROR_MESSAGE, ""
                     logged_in_users.append(username)
                     logged_in_users_accessed = False
@@ -184,8 +186,6 @@ async def matchmake():
         while not finished:
             if not matchmaking_users_accessed:
                 matchmaking_users_accessed = True
-                print("matchmake")
-                print(matchmaking_users)
                 while len(matchmaking_users) >= 2:
                     p1 = matchmaking_users.pop(len(matchmaking_users) - 1)
                     p2 = matchmaking_users.pop(len(matchmaking_users) - 1)
@@ -304,7 +304,6 @@ async def respond(websocket, path):
             protocol_message = get_protocol_message(message)
 
             print(message)
-            print(protocol_message)
 
             # reset the response
             response = ""
