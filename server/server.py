@@ -351,15 +351,21 @@ async def respond(websocket, path):
                     card = player.enemy.draw_a_card()
                     await enemy_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
             elif protocol_message == ATTACK_MESSAGE:
-                print("attac succes")
                 attacking_card_name = get_data(message)[0]
                 defending_card_name = get_data(message)[1]
+                print("attacking_card_name in player.board + defending_card_name in player.enemy.board + (not player.check_card_attacked(attacking_card_name))")
+                print(str(attacking_card_name in player.board) + str(defending_card_name in player.enemy.board) + str(not player.check_card_attacked(attacking_card_name)))
                 if attacking_card_name in player.board and defending_card_name in player.enemy.board and not player.check_card_attacked(attacking_card_name):
+                    print("attac succes")
                     (enemy_username, enemy_socket) = player.enemy.identifier
                     player.attack(attacking_card_name, defending_card_name)
                     await enemy_socket.send(GET_ATTACKED_MESSAGE + SEPERATOR + attacking_card_name + DATA_SEPERATOR + defending_card_name)
             elif protocol_message == ATTACK_HEAD_MESSAGE:
                 attacking_card_name = get_data(message)[0]
+                print(
+                    "print(attacking_card_name in player.board + (not player.check_card_attacked(attacking_card_name)))")
+                print(
+                    str(attacking_card_name in player.board) + str(not player.check_card_attacked(attacking_card_name)))
                 if attacking_card_name in player.board and not player.check_card_attacked(attacking_card_name):
                     print("attac succes")
                     (enemy_username, enemy_socket) = player.enemy.identifier
