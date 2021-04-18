@@ -134,6 +134,8 @@ func update_enemy_mana_text(mana_text : String):
 	$EnemyMana/EnemyManaCount.text = mana_text
 	
 func update_turn_info(mt : bool):
+	if $TurnNotification:
+		$TurnNotification.play()
 	my_turn = mt
 	# enable clicking if my turn and update the text
 	if my_turn:
