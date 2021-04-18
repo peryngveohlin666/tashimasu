@@ -120,7 +120,7 @@ margin_right = 181.749
 margin_bottom = 401.0
 rect_rotation = -180.0
 custom_fonts/font = ExtResource( 2 )
-text = "40"
+text = "34"
 __meta__ = {
 "_edit_use_anchors_": false
 }

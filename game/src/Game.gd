@@ -20,7 +20,7 @@ var hand : Array
 var table : Array
 var enemy_table : Array
 var deck_size : int = 40
-var enemy_deck_size : int = 40
+var enemy_deck_size : int = 34
 var friendly_slots = []
 var enemy_slots = []
 

@@ -63,6 +63,9 @@ var cert : X509Certificate
 
 var auth_token: String
 
+# a boolean variable to check if the first turn message is sent
+var first_turn_message_sent: bool = false
+
 func _ready():
 	
 	# load the certificate
@@ -106,8 +109,12 @@ func _on_received_data() -> void:
 		get_parent().hide_matchmaking_popup()
 	if(_get_protocol_message(parsed_data) == YOUR_TURN_MESSAGE):
 		get_parent().get_node("./Game").update_turn_info(true)
+		first_turn_message_sent = true
 	if(_get_protocol_message(parsed_data) == ENEMY_TURN_MESSAGE):
 		get_parent().get_node("./Game").update_turn_info(false)
+		if first_turn_message_sent:
+			get_parent().get_node("./Game").enemy_draw_a_card()
+		first_turn_message_sent = true
 	if(_get_protocol_message(parsed_data) == DRAW_A_CARD_MESSAGE):
 		get_parent().get_node("./Game").draw_a_card(_get_data(parsed_data)[0])
 	if(_get_protocol_message(parsed_data) == ENEMY_PLAY_MESSAGE):
