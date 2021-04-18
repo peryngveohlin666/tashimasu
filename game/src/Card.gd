@@ -258,6 +258,7 @@ func _on_Focus_mouse_entered() -> void:
 			target_position = default_position
 			target_position.y -= 150
 			state = focused_in_hand
+			get_parent().get_node("CardFocus").play()
 
 func _on_Focus_mouse_exited() -> void:
 	mouse_is_inside = false
@@ -268,6 +269,7 @@ func _on_Focus_mouse_exited() -> void:
 			target_rotation = default_rotation
 			state = reorganise_hand
 			get_parent().reorganise_hand()
+			get_parent().get_node("CardFocus").stop()
 			
 # move the neighbor card (check if on the left and multiply by spread factor)
 func move_neighbor_card(card_num, left, spread_factor):
@@ -320,6 +322,7 @@ func _input(event: InputEvent) -> void:
 									get_parent().reorganise_hand()
 									get_parent().get_parent().get_node("Client").play_a_card(file_name)
 									get_parent().update_hand_render_order()
+									get_parent().get_node("CardPlay").play()
 									break
 							
 				# return the card back on right click
@@ -353,6 +356,7 @@ func _input(event: InputEvent) -> void:
 									attacked = true
 									get_parent().get_parent().get_node("Client").attack_enemy_head(file_name)
 									get_parent().hit_enemy(attack)
+									get_parent().get_node("Attack").play()
 							for ca in enemy_cards:
 								# if the mouse is in the enemy card attack it
 								var real_ca_size = ca.rect_size * ca.rect_scale
@@ -366,6 +370,7 @@ func _input(event: InputEvent) -> void:
 									last_attacked = ca
 									attacked = true
 									get_parent().get_parent().get_node("Client").attack_to_a_card(file_name, ca.file_name)
+									get_parent().get_node("Attack").play()
 									break
 	else:
 		if event.is_action_pressed("leftclick") && mouse_is_inside && not card_earned:

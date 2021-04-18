@@ -1,9 +1,12 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://src/Game.gd" type="Script" id=1]
 [ext_resource path="res://assets/fonts/DynamicFont200.tres" type="DynamicFont" id=2]
 [ext_resource path="res://assets/fonts/Game-Over.ttf" type="DynamicFontData" id=3]
 [ext_resource path="res://src/EnemyHead.gd" type="Script" id=4]
+[ext_resource path="res://assets/sound/focus.wav" type="AudioStream" id=5]
+[ext_resource path="res://assets/sound/card_play.wav" type="AudioStream" id=6]
+[ext_resource path="res://assets/sound/card_draw.wav" type="AudioStream" id=7]
 
 [sub_resource type="Shader" id=1]
 
@@ -240,4 +243,14 @@ text = "X"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="CardFocus" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 5 )
+volume_db = -13.126
+
+[node name="CardPlay" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 6 )
+
+[node name="CardDraw" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 7 )
 [connection signal="button_down" from="Turn/SkipButton" to="." method="_on_SkipButton_button_down"]

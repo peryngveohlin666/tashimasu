@@ -1,6 +1,8 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=5 format=2]
 
 [ext_resource path="res://assets/fonts/DynamicFont200.tres" type="DynamicFont" id=1]
+[ext_resource path="res://assets/sound/button_press.wav" type="AudioStream" id=2]
+[ext_resource path="res://src/UIButton.gd" type="Script" id=3]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.333333, 0.329412, 0.329412, 0.313726 )
@@ -15,6 +17,7 @@ margin_bottom = 140.0
 rect_min_size = Vector2( 500, 140 )
 keep_pressed_outside = true
 flat = true
+script = ExtResource( 3 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -34,3 +37,9 @@ align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Press" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 2 )
+[connection signal="focus_entered" from="." to="." method="_on_UIButton_focus_entered"]
+[connection signal="focus_exited" from="." to="." method="_on_UIButton_focus_exited"]
+[connection signal="mouse_entered" from="." to="." method="_on_UIButton_mouse_entered"]

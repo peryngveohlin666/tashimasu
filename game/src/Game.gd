@@ -63,6 +63,8 @@ enum {
 
 # a function to initialize a card and play the drawing card animations
 func draw_a_card(cardname : String):
+		if $CardDraw:
+			$CardDraw.play()
 		card_angle = PI/2 + between_cards*(len(hand)/2 - len(hand))
 		var new_card = card.instance()
 		# resize card
@@ -189,6 +191,8 @@ func play_enemy_card(card_name : String):
 
 # a function to play enemy attack animations
 func enemy_attack(enemy_card_name : String, player_card_name : String):
+	if $Attack:
+		$Attack.play()
 	var player_card # player card
 	var enemy_card # enemy card
 	# find the player card from the string
@@ -215,6 +219,8 @@ func enemy_attack(enemy_card_name : String, player_card_name : String):
 
 # animations when the enemy attack our head
 func enemy_attack_head(enemy_card_name : String):
+	if $Attack:
+		$Attack.play()
 	var enemy_card
 	for ec in enemy_table:
 		if ec.file_name == enemy_card_name:
