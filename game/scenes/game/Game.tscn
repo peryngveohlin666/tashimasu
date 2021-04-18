@@ -114,10 +114,10 @@ __meta__ = {
 }
 
 [node name="EnemyCardCount" type="Label" parent="EnemyDeck"]
-margin_left = 93.7493
-margin_top = 288.0
-margin_right = 181.749
-margin_bottom = 401.0
+margin_left = 98.7896
+margin_top = 114.131
+margin_right = 186.79
+margin_bottom = 227.131
 rect_rotation = -180.0
 custom_fonts/font = ExtResource( 2 )
 text = "34"
@@ -126,10 +126,10 @@ __meta__ = {
 }
 
 [node name="EnemyHealth" type="Label" parent="EnemyDeck"]
-margin_left = 187.5
-margin_top = 136.0
-margin_right = 275.5
-margin_bottom = 365.0
+margin_left = 183.948
+margin_top = 254.505
+margin_right = 271.948
+margin_bottom = 483.505
 rect_rotation = 180.0
 custom_fonts/font = SubResource( 3 )
 custom_colors/font_color = Color( 0.803922, 0.117647, 0.117647, 1 )
