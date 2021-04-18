@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://src/Game.gd" type="Script" id=1]
 [ext_resource path="res://assets/fonts/DynamicFont200.tres" type="DynamicFont" id=2]
@@ -7,6 +7,8 @@
 [ext_resource path="res://assets/sound/focus.wav" type="AudioStream" id=5]
 [ext_resource path="res://assets/sound/card_play.wav" type="AudioStream" id=6]
 [ext_resource path="res://assets/sound/card_draw.wav" type="AudioStream" id=7]
+[ext_resource path="res://assets/sound/attack_sound.wav" type="AudioStream" id=8]
+[ext_resource path="res://assets/sound/turn_notification.wav" type="AudioStream" id=9]
 
 [sub_resource type="Shader" id=1]
 
@@ -253,4 +255,10 @@ stream = ExtResource( 6 )
 
 [node name="CardDraw" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 7 )
+
+[node name="Attack" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 8 )
+
+[node name="TurnNotification" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 9 )
 [connection signal="button_down" from="Turn/SkipButton" to="." method="_on_SkipButton_button_down"]

@@ -146,6 +146,7 @@ cython_debug/
 # the big file
 *.h5
 server/uri.txt
+server_ec2/uri.txt
 
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839

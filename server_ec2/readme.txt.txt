@@ -1,0 +1,1 @@
+this is the ec2 version of the server for amazon ec2 to not cost me a lot, it just gets rid of the constantly running matchmake function to not waste a lot of cpu time. I don't know if I will keep it up to date all the time.
