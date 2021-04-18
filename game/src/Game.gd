@@ -184,8 +184,6 @@ func play_enemy_card(card_name : String):
 		new_card.setup = true
 		enemy_table.append(new_card)
 		new_card.state = on_table
-		
-		enemy_current_mana -= new_card.cost
 	
 		add_child(new_card)
 
