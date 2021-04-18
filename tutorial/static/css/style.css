@@ -1,0 +1,56 @@
+.foreground {
+  background-image: linear-gradient(to bottom, #D1D5EE, #EEF2FF);
+}
+
+body {
+  background-image: linear-gradient(to bottom, #FED7B0, #FFFFEE);
+  background-size: cover
+  padding: 1%;
+}
+
+h1 {
+    text-align:center;
+    padding: 1%;
+}
+
+h2 {
+    text-align:center;
+    padding: 1%;
+}
+
+p {
+  text-align:center;
+  padding: 1%;
+}
+
+.img_10 {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 10%;
+  padding: 1%;
+}
+
+.img_15 {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 15%;
+  padding: 1%;
+}
+
+.img_40 {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 40%;
+  padding: 1%;
+}
+
+.img_8 {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 8%;
+  padding: 1%;
+}
