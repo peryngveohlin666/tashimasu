@@ -17,7 +17,7 @@ db = cluster["tashimasu"]  # select the cluster
 collection = db["tashimasu"]  # select the collection
 
 # ip and port the server is running at
-IP = "localhost"
+IP = "172.31.29.219"
 PORT = 6565
 # password pepper
 PEPPER = "coolpepperbro"
@@ -159,13 +159,16 @@ def register(message):
         results = collection.find({"username": username})
         if results.count() > 0:
             return ERROR_MESSAGE
-
-        collection.insert_one(
-            {"username": username, "password_hash": password_hash, "password_salt": password_salt, "cards": cards,
-             "deck": cards})
-        return (SUCCESS_RESPONSE)
-
-    return ERROR_MESSAGE
+        try:
+            collection.insert_one(
+                {"username": username, "password_hash": password_hash, "password_salt": password_salt, "cards": cards,
+                "deck": cards})
+            return (SUCCESS_RESPONSE)
+        except:
+            pass
+        finally:
+            pass
+    return SUCCESS_RESPONSE
 
 
 # get the starter cards from the starter directory to register users with a starter deck
