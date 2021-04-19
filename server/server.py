@@ -1,4 +1,4 @@
-import asyncio, websockets, ssl
+import asyncio, websockets, ssl, threading
 import os
 import random
 import string
@@ -80,6 +80,8 @@ LOST_GAME_MESSAGE = "LOST"
 
 WON_GAME_MESSAGE = "WON"
 
+LOCK_TIMEOUT = 5
+
 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 ssl_context.load_cert_chain('cert/tashimasu.crt', 'cert/tashimasu.key')
 
@@ -89,11 +91,13 @@ logged_in_users = []
 # a bool value to check if logged in users is accessed
 logged_in_users_accessed = False
 
+logged_in_users_lock = threading.Lock()
+
 # a list of currently matchmaking users
 matchmaking_users = []
 
-# a bool value to check if the matchamking users are being accessed before accessing them
-matchmaking_users_accessed = False
+# a lock to see if the matchmaking users is being accessed before accessing it
+matchmaking_users_lock = threading.Lock()
 
 
 
@@ -120,20 +124,18 @@ def login(message):
         password_hash = bcrypt.hashpw((PEPPER + password).encode("utf-8"), password_salt)
 
         if password_hash == result["password_hash"]:
-            global logged_in_users_accessed
+            global logged_in_users_lock
             global logged_in_users
-            # check if the user is logged in
-            finished = False
-            while not finished:
-                if not logged_in_users_accessed:
-                    logged_in_users_accessed = True
-                    if username in logged_in_users:
-                        finished = True
-                        logged_in_users_accessed = False
-                        return ERROR_MESSAGE, ""
-                    logged_in_users.append(username)
-                    logged_in_users_accessed = False
+
+            try:
+                logged_in_users_lock.acquire(blocking=True, timeout=LOCK_TIMEOUT)
+                # check if the user is logged in
+                if username in logged_in_users:
                     finished = True
+                    return ERROR_MESSAGE, ""
+                logged_in_users.append(username)
+            finally:
+                logged_in_users_lock.release()
             return (SUCCESS_LOGIN_RESPONSE + SEPERATOR + generate_random_string(), username)
 
     return ERROR_MESSAGE, ""
@@ -179,48 +181,59 @@ def get_starter_cards():
 
 # a function to constantly pair players who are matchmaking
 async def matchmake():
+    print("matchmaking")
+    global matchmaking_users_lock
+
     try:
-        global matchmaking_users_accessed
-        finished = False
+        matchmaking_users_lock.acquire(blocking=True, timeout=LOCK_TIMEOUT)
+        print("acquired lock matchmake()")
+        while len(matchmaking_users) >= 2:
+            p1 = matchmaking_users.pop(len(matchmaking_users) - 1)
+            p2 = matchmaking_users.pop(len(matchmaking_users) - 1)
+            print("1")
+            p1.set_enemy(p2)
+            p2.set_enemy(p1)
+            print("2")
+            (p1_username, p1_socket) = p1.identifier
+            (p2_username, p2_socket) = p2.identifier
+            print("3")
+            await p1_socket.send(GAME_FOUND_MESSAGE)
+            await p2_socket.send(GAME_FOUND_MESSAGE)
+            await p1_socket.send(YOUR_TURN_MESSAGE)
+            await p2_socket.send(ENEMY_TURN_MESSAGE)
+            print("4")
+            p1.turn = True
+            p2.turn = False
+            p1.mana += 1
+            p1.current_mana = p1.mana
+            print("5")
 
-        while not finished:
-            if not matchmaking_users_accessed:
-                matchmaking_users_accessed = True
-                while len(matchmaking_users) >= 2:
-                    p1 = matchmaking_users.pop(len(matchmaking_users) - 1)
-                    p2 = matchmaking_users.pop(len(matchmaking_users) - 1)
-                    for user in matchmaking_users:
-                        print(user.username)
-                    p1.set_enemy(p2)
-                    p2.set_enemy(p1)
-                    (p1_username, p1_socket) = p1.identifier
-                    (p2_username, p2_socket) = p2.identifier
-                    await p1_socket.send(GAME_FOUND_MESSAGE)
-                    await p2_socket.send(GAME_FOUND_MESSAGE)
-                    await p1_socket.send(YOUR_TURN_MESSAGE)
-                    await p2_socket.send(ENEMY_TURN_MESSAGE)
-                    p1.turn = True
-                    p2.turn = False
-                    p1.mana += 1
-                    p1.current_mana = p1.mana
+            try:
+                # sleep for a second to make sure that the players load the scene so that there won't be a load of commands going through slowing their computer down
+                await asyncio.sleep(1)
+            except:
+                print("err")
+            finally:
+                pass
+            print("6")
 
-                    # sleep for half a second to make sure that the players load the scene so that there won't be a load of commands going through slowing their computer down
-                    await asyncio.sleep(0.5)
+            # draw cards for the players one
+            for i in range(6):
+                card = p1.draw_a_card()
+                await p1_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
+                card2 = p2.draw_a_card()
+                await p2_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card2)
+            print("7")
 
-                    # draw cards for the players one
-                    for i in range(6):
-                        card = p1.draw_a_card()
-                        await p1_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
-                        card2 = p2.draw_a_card()
-                        await p2_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card2)
-
-                    print(p2_username + p1_username)
-                matchmaking_users_accessed = False
-                finished = True
-                await asyncio.sleep(1) # matchmake every second
+            print(p2_username + p1_username)
+            print("8")
     finally:
-        matchmaking_users_accessed = False
-        asyncio.create_task(matchmake())
+        try:
+            matchmaking_users_lock.release()
+            print("released lock matchmake()")
+            await asyncio.sleep(1)  # matchmake every second
+        finally:
+            asyncio.create_task(matchmake())
 
 
 
@@ -289,10 +302,10 @@ protocol_to_function = {
 
 
 async def respond(websocket, path):
-    global matchmaking_users_accessed
-    global logged_in_users_accessed
     global logged_in_users
+    global logged_in_users_lock
     global matchmaking_users
+    global matchmaking_users_lock
 
     username = ""
     auth_key = ""
@@ -319,18 +332,18 @@ async def respond(websocket, path):
                 # reset the player
                 player = Player.Player()
                 player.set_identifier((username, websocket))
-                finished = False
-                while not finished:
-                    if not matchmaking_users_accessed:
-                        matchmaking_users_accessed = True
-                        if player not in matchmaking_users:
-                            player.assign_deck(get_deck(username))
-                            print(player.deck)
-                            matchmaking_users.append(player)
-                        else:
-                            response = ERROR_MESSAGE
-                        matchmaking_users_accessed = False
-                        finished = True
+                try:
+                    matchmaking_users_lock.acquire(blocking=True, timeout=LOCK_TIMEOUT)
+                    print("acquired lock")
+                    if player not in matchmaking_users:
+                        player.assign_deck(get_deck(username))
+                        print(player.deck)
+                        matchmaking_users.append(player)
+                    else:
+                        response = ERROR_MESSAGE
+                finally:
+                    matchmaking_users_lock.release()
+                    print("released lock")
             elif protocol_message == PLAY_A_CARD_MESSAGE:
                 card_name = get_data(message)[0]
                 if player.turn and get_cost_value(card_name) <= player.current_mana:
@@ -397,19 +410,23 @@ async def respond(websocket, path):
             if response != "":
                 await websocket.send(response)
     finally:
-        finished = False
-        while not finished:
-            if not matchmaking_users_accessed and not logged_in_users_accessed:
-                logged_in_users_accessed = True
-                matchmaking_users_accessed = True
-                if username in logged_in_users:
-                    logged_in_users.remove(username)
-                if player in matchmaking_users:
-                    matchmaking_users.remove(player)
-                print(f"disconnected unresponsive socket {websocket}")
-                matchmaking_users_accessed = False
-                logged_in_users_accessed = False
-                finished = True
+
+        try:
+            matchmaking_users_lock.acquire(blocking=True, timeout=LOCK_TIMEOUT)
+            print("acquired lock")
+            if player in matchmaking_users:
+                matchmaking_users.remove(player)
+        finally:
+            matchmaking_users_lock.release()
+            print("released lock")
+
+
+        try:
+            logged_in_users_lock.acquire(blocking=True, timeout=LOCK_TIMEOUT)
+            if username in logged_in_users:
+                logged_in_users.remove(username)
+        finally:
+            logged_in_users_lock.release()
 
 
 start_server = websockets.serve(respond, IP, PORT, ssl=ssl_context)
