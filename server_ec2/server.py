@@ -17,7 +17,7 @@ db = cluster["tashimasu"]  # select the cluster
 collection = db["tashimasu"]  # select the collection
 
 # ip and port the server is running at
-IP = "localhost"
+IP = "172.31.29.219"
 PORT = 6565
 # password pepper
 PEPPER = "coolpepperbro"
@@ -406,7 +406,10 @@ async def respond(websocket, path):
                 print("responded")
                 await websocket.send(RESPOND_DECK_MESSAGE + SEPERATOR + get_deck_string(username))
             elif protocol_message == UPDATE_DECK_MESSAGE:
-                collection.update_one({"username": username}, {"$set": {"deck": get_data_string(message)}})
+                try:
+                    collection.update_one({"username": username}, {"$set": {"deck": get_data_string(message)}})
+                finally:
+                    pass
             else:
                 # get the proper function for the incoming protocol code and pass the message through to the necessary function
                 response = protocol_to_function[get_protocol_message(message)](message)
