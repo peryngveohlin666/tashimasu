@@ -294,7 +294,7 @@ def earn_a_card(username):
         try:
             collection.update_one({"username": username}, {"$set": {"cards": new_cards}})
         finally:
-            pass
+            return earned_card
 
     # return the earned card for the cool animations in the client
     return earned_card
