@@ -351,19 +351,20 @@ async def respond(websocket, path):
                     (enemy_username, enemy_socket) = player.enemy.identifier
                     await enemy_socket.send(ENEMY_PLAY_MESSAGE + SEPERATOR + card_name)
             elif protocol_message == END_TURN_MESSAGE:
-                # set the cards non attacked
-                player.set_all_cards_non_attacked()
-                player.enemy.set_all_cards_non_attacked()
-                (enemy_username, enemy_socket) = player.enemy.identifier
-                await enemy_socket.send(YOUR_TURN_MESSAGE)
-                await websocket.send(ENEMY_TURN_MESSAGE)
-                player.enemy.turn = True
-                player.turn = False
-                player.enemy.mana += 1
-                player.enemy.current_mana = player.enemy.mana
-                if len(player.enemy.hand) != 10:
-                    card = player.enemy.draw_a_card()
-                    await enemy_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
+                if player.turn:
+                    # set the cards non attacked
+                    player.set_all_cards_non_attacked()
+                    player.enemy.set_all_cards_non_attacked()
+                    (enemy_username, enemy_socket) = player.enemy.identifier
+                    await enemy_socket.send(YOUR_TURN_MESSAGE)
+                    await websocket.send(ENEMY_TURN_MESSAGE)
+                    player.enemy.turn = True
+                    player.turn = False
+                    player.enemy.mana += 1
+                    player.enemy.current_mana = player.enemy.mana
+                    if len(player.enemy.hand) != 10:
+                        card = player.enemy.draw_a_card()
+                        await enemy_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
             elif protocol_message == ATTACK_MESSAGE:
                 attacking_card_name = get_data(message)[0]
                 defending_card_name = get_data(message)[1]
