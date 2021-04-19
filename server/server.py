@@ -219,6 +219,7 @@ async def matchmake():
                 finished = True
                 await asyncio.sleep(1) # matchmake every second
     finally:
+        matchmaking_users_accessed = False
         asyncio.create_task(matchmake())
 
 
