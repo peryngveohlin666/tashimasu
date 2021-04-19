@@ -408,6 +408,8 @@ async def respond(websocket, path):
             elif protocol_message == UPDATE_DECK_MESSAGE:
                 try:
                     collection.update_one({"username": username}, {"$set": {"deck": get_data_string(message)}})
+                except:
+                    print("test")
                 finally:
                     pass
             else:
