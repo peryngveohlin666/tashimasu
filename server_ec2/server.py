@@ -184,41 +184,45 @@ def get_starter_cards():
 async def matchmake():
     global matchmaking_users_accessed
     finished = False
+    try:
 
-    while not finished:
-        if not matchmaking_users_accessed:
-            matchmaking_users_accessed = True
-            while len(matchmaking_users) >= 2:
-                p1 = matchmaking_users.pop(len(matchmaking_users) - 1)
-                p2 = matchmaking_users.pop(len(matchmaking_users) - 1)
-                for user in matchmaking_users:
-                    print(user.username)
-                p1.set_enemy(p2)
-                p2.set_enemy(p1)
-                (p1_username, p1_socket) = p1.identifier
-                (p2_username, p2_socket) = p2.identifier
-                await p1_socket.send(GAME_FOUND_MESSAGE)
-                await p2_socket.send(GAME_FOUND_MESSAGE)
-                await p1_socket.send(YOUR_TURN_MESSAGE)
-                await p2_socket.send(ENEMY_TURN_MESSAGE)
-                p1.turn = True
-                p2.turn = False
-                p1.mana += 1
-                p1.current_mana = p1.mana
+        while not finished:
+            if not matchmaking_users_accessed:
+                matchmaking_users_accessed = True
+                while len(matchmaking_users) >= 2:
+                    p1 = matchmaking_users.pop(len(matchmaking_users) - 1)
+                    p2 = matchmaking_users.pop(len(matchmaking_users) - 1)
+                    for user in matchmaking_users:
+                        print(user.username)
+                    p1.set_enemy(p2)
+                    p2.set_enemy(p1)
+                    (p1_username, p1_socket) = p1.identifier
+                    (p2_username, p2_socket) = p2.identifier
+                    await p1_socket.send(GAME_FOUND_MESSAGE)
+                    await p2_socket.send(GAME_FOUND_MESSAGE)
+                    await p1_socket.send(YOUR_TURN_MESSAGE)
+                    await p2_socket.send(ENEMY_TURN_MESSAGE)
+                    p1.turn = True
+                    p2.turn = False
+                    p1.mana += 1
+                    p1.current_mana = p1.mana
 
-                # sleep for half a second to make sure that the players load the scene so that there won't be a load of commands going through slowing their computer down
-                await asyncio.sleep(0.5)
+                    # sleep for half a second to make sure that the players load the scene so that there won't be a load of commands going through slowing their computer down
+                    await asyncio.sleep(0.5)
 
-                # draw cards for the players one
-                for i in range(6):
-                    card = p1.draw_a_card()
-                    await p1_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
-                    card2 = p2.draw_a_card()
-                    await p2_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card2)
+                    # draw cards for the players one
+                    for i in range(6):
+                        card = p1.draw_a_card()
+                        await p1_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card)
+                        card2 = p2.draw_a_card()
+                        await p2_socket.send(DRAW_A_CARD_MESSAGE + SEPERATOR + card2)
 
-                print(p2_username + p1_username)
-            matchmaking_users_accessed = False
-            finished = True
+                    print(p2_username + p1_username)
+                matchmaking_users_accessed = False
+                finished = True
+    finally:
+        matchmaking_users_accessed = False
+        finished = True
 
 
 
