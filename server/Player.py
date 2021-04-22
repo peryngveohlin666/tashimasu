@@ -37,6 +37,7 @@ class Player:
                 self.hand.remove(card)
                 self.board.append(card)
                 self.current_mana -= cost
+                self.attacked.append(False)
                 self.set_card_non_attacked(card)
 
     def set_enemy(self, enemy):
@@ -76,6 +77,7 @@ class Player:
                 return False
         return False
 
+# extract data from cards
     def get_defense_value(self, card_name):
         return int(card_name.split(".")[0].split("_")[3])
 
@@ -88,7 +90,12 @@ class Player:
     def kill_a_card(self, card_name):
         if card_name in self.board:
             self.set_card_non_attacked(card_name)
+            card_index = self.board.index(card_name)
+            # so that the indexes move
+            del self.attacked[card_index]
             self.board.remove(card_name)
+
+# set card status, (card name as a string)
 
     def set_card_attacked(self, card_name):
         card_index = self.board.index(card_name)
