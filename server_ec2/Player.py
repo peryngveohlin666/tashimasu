@@ -5,6 +5,7 @@ import random
 class Player:
 
     def __init__(self):
+        self.won = False
         self.turn = False
         self.health = 40
         self.mana = 0
@@ -72,7 +73,11 @@ class Player:
             self.set_card_attacked(attacking_card)
             print("attacked enemy health is: " + str(self.enemy.health) + "my health is " + str(self.health))
             if self.enemy.health <= 0:
-                return True
+                if not self.won:
+                    self.won = True
+                    return True
+                else:
+                    return False
             else:
                 return False
         return False
